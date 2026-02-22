@@ -1,70 +1,164 @@
-import { View, Text, ActivityIndicator, StyleSheet } from "react-native";
-import Header from "@/components/Header";
-import { usePrayerTimes } from "@/hooks/usePrayerTimes";
-import { useAppStore } from "@/store/appStore";
-import CountdownCard from "@/components/CountDownCard";
-import { getCurrentAndNextPrayer } from "@/utils/prayerUtils";
-import RamadanCard from "@/components/RamadanCard";
-import NotificationBanner from "@/components/NotificationsBanner";
-
-export default function HomeScreen() {
-  const { loading } = usePrayerTimes();
-  const prayers = useAppStore((s) => s.prayerTimes);
-  console.log("Prayer times:", prayers);
-  const prayerInfo = prayers ? getCurrentAndNextPrayer(prayers) : null;
-  const isRamadan = useAppStore((s) => s.isRamadan);
-
-  if (loading) {
+import {
+    View,
+    Text,
+    ActivityIndicator,
+    StyleSheet,
+    ScrollView,
+    FlatList,
+    Image,
+  } from "react-native";
+  import Header from "@/components/Header";
+  import { usePrayerTimes } from "@/hooks/usePrayerTimes";
+  import { useAppStore } from "@/store/appStore";
+  import CountdownCard from "@/components/CountDownCard";
+  import { getCurrentAndNextPrayer } from "@/utils/prayerUtils";
+  import RamadanCard from "@/components/RamadanCard";
+  import NotificationBanner from "@/components/NotificationsBanner";
+  import { colors } from "@/theme/color";
+  
+  const stories = [
+    { id: "1", img: "https://picsum.photos/200/300" },
+    { id: "2", img: "https://picsum.photos/201/300" },
+    { id: "3", img: "https://picsum.photos/202/300" },
+    { id: "4", img: "https://picsum.photos/203/300" },
+  ];
+  
+  export default function HomeScreen() {
+    const { loading } = usePrayerTimes();
+    const prayers = useAppStore((s) => s.prayerTimes);
+    const isRamadan = useAppStore((s) => s.isRamadan);
+  
+    const prayerInfo = prayers ? getCurrentAndNextPrayer(prayers) : null;
+  
+    if (loading) {
+      return (
+        <View style={styles.center}>
+          <ActivityIndicator size="large" color="#6C63FF" />
+          <Text style={{ color: "#fff" }}>Loading prayer times...</Text>
+        </View>
+      );
+    }
+  
+    if (!prayers) {
+      return (
+        <View style={styles.center}>
+          <Text style={{ color: "#fff" }}>No data available</Text>
+        </View>
+      );
+    }
+  
     return (
-      <View style={styles.center}>
-        <ActivityIndicator size="large" />
-        <Text>Loading prayer times...</Text>
+      <View style={styles.container}>
+        <ScrollView showsVerticalScrollIndicator={false}>
+          <Header />
+  
+          {/* Countdown Card */}
+          {prayerInfo && (
+            <CountdownCard
+              current={prayerInfo.current}
+              next={prayerInfo.next}
+              nextTime={prayerInfo.nextTime}
+            />
+          )}
+  
+          {/* Notification Banner */}
+          <NotificationBanner />
+  
+          {/* Ramadan Card */}
+          {isRamadan && <RamadanCard timings={prayers} />}
+  
+          {/* Latest Stories */}
+          <Text style={styles.sectionTitle}>Latest Stories</Text>
+          <FlatList
+            horizontal
+            data={stories}
+            keyExtractor={(item) => item.id}
+            showsHorizontalScrollIndicator={false}
+            renderItem={({ item }) => (
+              <Image source={{ uri: item.img }} style={styles.storyImage} />
+            )}
+          />
+  
+          {/* Goals Progress */}
+          <View style={styles.goalCard}>
+            <Text style={styles.goalTitle}>Complete 5 more goals today</Text>
+  
+            <View style={styles.progressBar}>
+              <View style={[styles.progress, { width: "60%" }]} />
+            </View>
+  
+            <Text style={styles.goalStats}>
+              3/5 Prayers • 5/6 Dhikr • 1/2 Ramadan
+            </Text>
+          </View>
+        </ScrollView>
       </View>
     );
   }
 
-  if (!prayers) {
-    return (
-      <View style={styles.center}>
-        <Text>No data available</Text>
-      </View>
-    );
-  }
 
-  return (
-    <View style={styles.container}>
-      <Header />
-      {prayerInfo && (
-        <CountdownCard
-          current={prayerInfo.current}
-          next={prayerInfo.next}
-          nextTime={prayerInfo.nextTime}
-        />
-      )}
-      <NotificationBanner />
-      {isRamadan && <RamadanCard timings={prayers} />}
-
-      
-    </View>
-  );
-}
 
 const styles = StyleSheet.create({
-  container: { flex: 1 , marginTop: 20 , padding: 20},
-  card: {
-    margin: 20,
-    padding: 20,
-    backgroundColor: "#f2f2f2",
-    borderRadius: 10,
+  container: {
+    flex: 1,
+    backgroundColor: colors.background,
+    paddingHorizontal: 16,
+    paddingTop: 20,
   },
-  title: {
-    fontSize: 18,
-    fontWeight: "bold",
-    marginBottom: 10,
-  },
+
   center: {
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
+    backgroundColor: colors.background,
+  },
+
+  sectionTitle: {
+    color: colors.textPrimary,
+    fontSize: 18,
+    fontWeight: "600",
+    marginTop: 20,
+    marginBottom: 10,
+  },
+
+  storyImage: {
+    width: 120,
+    height: 160,
+    borderRadius: 14,
+    marginRight: 10,
+  },
+
+  goalCard: {
+    backgroundColor: colors.surface,
+    borderRadius: 16,
+    padding: 16,
+    marginTop: 20,
+    marginBottom: 40,
+  },
+
+  goalTitle: {
+    color: colors.textPrimary,
+    fontSize: 16,
+    fontWeight: "600",
+    marginBottom: 10,
+  },
+
+  progressBar: {
+    height: 8,
+    backgroundColor: colors.border,
+    borderRadius: 10,
+    overflow: "hidden",
+  },
+
+  progress: {
+    height: 8,
+    backgroundColor: colors.success,
+  },
+
+  goalStats: {
+    color: colors.textSecondary,
+    marginTop: 8,
+    fontSize: 12,
   },
 });
+

@@ -13,11 +13,11 @@ export default function TabsLayout() {
       screenOptions={{
         headerShown: false,
         tabBarStyle: {
-          backgroundColor: colors.card,
+          backgroundColor: colors.surface,
           borderTopColor: colors.border,
         },
         tabBarActiveTintColor: colors.primary,
-        tabBarInactiveTintColor: colors.subText,
+        tabBarInactiveTintColor: colors.textMuted,
       }}
     >
       <Tabs.Screen

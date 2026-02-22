@@ -8,15 +8,15 @@ export default function Header() {
   const hijriDate = useAppStore((s) => s.hijriDate);
 
   return (
-    <View style={tailwind`px-4 pt-4 pb-3 flex-row justify-between items-center`}>
-        <Text style={styles.logo}>Azaan Pro</Text>
+    <View
+      style={tailwind`px-4 pt-4 pb-3 flex-row justify-between items-center`}
+    >
+      <Text style={styles.logo}>Azaan Pro</Text>
       <View>
-        <Text style={[tailwind`text-lg font-bold`, { color: colors.text }]}>
-        {city}
+        <Text style={[tailwind`text-lg font-bold`, { color: colors.textSecondary}]}>
+          {city}
         </Text>
-        <Text style={{ color: colors.subText }}>
-        {hijriDate}
-        </Text>
+        <Text style={{ color: colors.textSecondary }}>{hijriDate}</Text>
       </View>
 
       <View style={tailwind`flex-row gap-3`}>
@@ -28,20 +28,14 @@ export default function Header() {
 }
 
 
-export  function Header2() {
-  
-}
-
 const styles = StyleSheet.create({
   container: {
     padding: 20,
-    backgroundColor: "#2D6A4F",
+    backgroundColor: colors.background,
   },
   logo: {
     fontSize: 22,
-    color: "#fff",
+    color: colors.textPrimary,
     fontWeight: "bold",
   },
-  city: { color: "#fff", marginTop: 4 },
-  hijri: { color: "#fff", marginTop: 2 },
 });
