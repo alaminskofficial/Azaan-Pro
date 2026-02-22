@@ -5,10 +5,21 @@ import {
   FontAwesome5,
   Ionicons,
 } from "@expo/vector-icons";
+import { colors } from "@/theme/color";
 
 export default function TabsLayout() {
   return (
-    <Tabs>
+    <Tabs
+      screenOptions={{
+        headerShown: false,
+        tabBarStyle: {
+          backgroundColor: colors.card,
+          borderTopColor: colors.border,
+        },
+        tabBarActiveTintColor: colors.primary,
+        tabBarInactiveTintColor: colors.subText,
+      }}
+    >
       <Tabs.Screen
         name="index"
         options={{
@@ -30,16 +41,6 @@ export default function TabsLayout() {
         }}
       />
       <Tabs.Screen
-        name="settings"
-        options={{
-          headerTitle: "Settings",
-          title: "App Settings",
-          tabBarIcon: ({ color }) => (
-            <Ionicons name="settings" size={24} color={color} />
-          ),
-        }}
-      />
-      <Tabs.Screen
         name="qibla"
         options={{
           headerTitle: "Qibla",
@@ -49,6 +50,17 @@ export default function TabsLayout() {
           ),
         }}
       />
+      <Tabs.Screen
+        name="settings"
+        options={{
+          headerTitle: "Settings",
+          title: "App Settings",
+          tabBarIcon: ({ color }) => (
+            <Ionicons name="settings" size={24} color={color} />
+          ),
+        }}
+      />
+
       <Tabs.Screen
         name="profile"
         options={{

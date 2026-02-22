@@ -4,11 +4,15 @@ import { usePrayerTimes } from "@/hooks/usePrayerTimes";
 import { useAppStore } from "@/store/appStore";
 import CountdownCard from "@/components/CountDownCard";
 import { getCurrentAndNextPrayer } from "@/utils/prayerUtils";
+import RamadanCard from "@/components/RamadanCard";
+import NotificationBanner from "@/components/NotificationsBanner";
 
 export default function HomeScreen() {
   const { loading } = usePrayerTimes();
   const prayers = useAppStore((s) => s.prayerTimes);
+  console.log("Prayer times:", prayers);
   const prayerInfo = prayers ? getCurrentAndNextPrayer(prayers) : null;
+  const isRamadan = useAppStore((s) => s.isRamadan);
 
   if (loading) {
     return (
@@ -37,22 +41,16 @@ export default function HomeScreen() {
           nextTime={prayerInfo.nextTime}
         />
       )}
+      <NotificationBanner />
+      {isRamadan && <RamadanCard timings={prayers} />}
 
-      <View style={styles.card}>
-        <Text style={styles.title}>Today's Prayers</Text>
-        <Text>Fajr: {prayers.Fajr}</Text>
-        <Text>Dhuhr: {prayers.Dhuhr}</Text>
-        <Text>Asr: {prayers.Asr}</Text>
-        <Text>Maghrib (Iftar): {prayers.Maghrib}</Text>
-        <Text>Isha: {prayers.Isha}</Text>
-        <Text>Sehri Ends (Imsak): {prayers.Imsak}</Text>
-      </View>
+      
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1 },
+  container: { flex: 1 , marginTop: 20 , padding: 20},
   card: {
     margin: 20,
     padding: 20,
