@@ -5,7 +5,9 @@ export const useCountdown = (targetTime: Date) => {
     const now = new Date().getTime();
     const distance = targetTime.getTime() - now;
 
-    if (distance <= 0) return "00:00:00";
+    if (distance <= 0) {
+      return { time: "00:00:00", ms: 0 };
+    }
 
     const hours = Math.floor(distance / (1000 * 60 * 60));
     const minutes = Math.floor(
@@ -13,18 +15,23 @@ export const useCountdown = (targetTime: Date) => {
     );
     const seconds = Math.floor((distance % (1000 * 60)) / 1000);
 
-    return `${hours}:${minutes}:${seconds}`;
+    const pad = (n: number) => (n < 10 ? `0${n}` : n);
+
+    return {
+      time: `${pad(hours)}:${pad(minutes)}:${pad(seconds)}`,
+      ms: distance,
+    };
   };
 
-  const [timeLeft, setTimeLeft] = useState(calculate());
+  const [state, setState] = useState(calculate());
 
   useEffect(() => {
     const interval = setInterval(() => {
-      setTimeLeft(calculate());
+      setState(calculate());
     }, 1000);
 
     return () => clearInterval(interval);
   }, [targetTime]);
 
-  return timeLeft;
+  return state; // { time, ms }
 };

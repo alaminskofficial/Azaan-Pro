@@ -4,20 +4,26 @@ import { colors } from "@/theme/color";
 import Svg, { Circle } from "react-native-svg";
 import { useMemo } from "react";
 
-export default function CountDownCard({ current, next, nextTime }: any) {
-  const timeLeft = useCountdown(nextTime);
+export default function CountDownCard({
+  current,
+  currentTime,
+  next,
+  nextTime,
+}: any) {
+  const { time, ms } = useCountdown(nextTime);
 
-  // Convert countdown (HH:MM:SS) → seconds
-  const totalSeconds = 24 * 60 * 60; // fallback
-  const remainingSeconds = useMemo(() => {
-    const parts = timeLeft?.split(":") || [];
-    if (parts.length !== 3) return 0;
-    return (
-      parseInt(parts[0]) * 3600 + parseInt(parts[1]) * 60 + parseInt(parts[2])
-    );
-  }, [timeLeft]);
+  const ONE_HOUR_MS = 60 * 60 * 1000;
 
-  const progress = 1 - remainingSeconds / totalSeconds;
+  // Show entire right section only within 1 hour
+  const showUpcoming = ms <= ONE_HOUR_MS && ms > 0;
+
+  // Circle progress only in last 60 minutes
+  const progress = useMemo(() => {
+    if (ms > ONE_HOUR_MS) return 0;
+    if (ms <= 0) return 1;
+
+    return 1 - ms / ONE_HOUR_MS;
+  }, [ms]);
 
   const radius = 55;
   const strokeWidth = 8;
@@ -28,48 +34,57 @@ export default function CountDownCard({ current, next, nextTime }: any) {
     <View style={styles.card}>
       <View style={styles.left}>
         <Text style={styles.prayerName}>{current}</Text>
+
         <Text style={styles.prayerTime}>
-          {nextTime instanceof Date
-            ? nextTime.toLocaleTimeString([], {
+          {currentTime instanceof Date
+            ? currentTime.toLocaleTimeString([], {
                 hour: "2-digit",
                 minute: "2-digit",
               })
-            : nextTime}
+            : currentTime}
         </Text>
 
         <Text style={styles.viewAll}>View All Prayers</Text>
       </View>
 
-      <View style={styles.right}>
-        <Svg width={140} height={140}>
-          <Circle
-            stroke={colors.border}
-            fill="none"
-            cx="70"
-            cy="70"
-            r={radius}
-            strokeWidth={strokeWidth}
-          />
-          <Circle
-            stroke={colors.success}
-            fill="none"
-            cx="70"
-            cy="70"
-            r={radius}
-            strokeWidth={strokeWidth}
-            strokeDasharray={circumference}
-            strokeDashoffset={strokeDashoffset}
-            strokeLinecap="round"
-            rotation="-90"
-            origin="70,70"
-          />
-        </Svg>
+      {/* Show only if next prayer is within 1 hour */}
+      {showUpcoming && (
+        <View style={styles.right}>
+          <Svg width={140} height={140}>
+            {/* Background */}
+            <Circle
+              stroke={colors.border}
+              fill="none"
+              cx="70"
+              cy="70"
+              r={radius}
+              strokeWidth={strokeWidth}
+            />
 
-        <View style={styles.timerContainer}>
-          <Text style={styles.nextLabel}>{next}</Text>
-          <Text style={styles.timer}>{timeLeft}</Text>
+            {/* Progress (last 30 min only) */}
+            {ms <= ONE_HOUR_MS && (
+              <Circle
+                stroke={colors.success}
+                fill="none"
+                cx="70"
+                cy="70"
+                r={radius}
+                strokeWidth={strokeWidth}
+                strokeDasharray={circumference}
+                strokeDashoffset={strokeDashoffset}
+                strokeLinecap="round"
+                rotation="-90"
+                origin="70,70"
+              />
+            )}
+          </Svg>
+
+          <View style={styles.timerContainer}>
+            <Text style={styles.nextLabel}>{next}</Text>
+            <Text style={styles.timer}>{time}</Text>
+          </View>
         </View>
-      </View>
+      )}
     </View>
   );
 }
@@ -84,10 +99,7 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     alignItems: "center",
   },
-
-  left: {
-    flex: 1,
-  },
+  left: { flex: 1 },
 
   prayerName: {
     fontSize: 32,

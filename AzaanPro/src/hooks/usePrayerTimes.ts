@@ -22,93 +22,123 @@ export const usePrayerTimes = () => {
 
   useEffect(() => {
     init();
-  }, []);
+  }, [method, school]); // refetch if user changes settings
 
   const init = async () => {
-    setLoading(true);
+    try {
+      setLoading(true);
 
-    // 1. Get location
-    const lastLocationStr = await AsyncStorage.getItem("last_location");
-    let loc;
-    if (lastLocationStr) {
-      loc = JSON.parse(lastLocationStr);
-    } else {
-      loc = await getUserLocation();
-      if (!loc) {
+      // -------------------------
+      // 1. Get location (cached or fresh)
+      // -------------------------
+      const lastLocationStr = await AsyncStorage.getItem("last_location");
+
+      let loc;
+
+      if (lastLocationStr) {
+        loc = JSON.parse(lastLocationStr);
+      } else {
+        loc = await getUserLocation();
+        if (!loc) {
+          setLoading(false);
+          return;
+        }
+      }
+
+      setCity(loc.city);
+      setLocation({
+        latitude: loc.latitude,
+        longitude: loc.longitude,
+      });
+
+      // -------------------------
+      // 2. Check if user moved >20km
+      // -------------------------
+      let shouldRefetch = false;
+
+      if (lastLocationStr) {
+        const last = JSON.parse(lastLocationStr);
+
+        const distance = getDistanceKm(
+          last.latitude,
+          last.longitude,
+          loc.latitude,
+          loc.longitude
+        );
+
+        if (distance > 20) shouldRefetch = true;
+      } else {
+        shouldRefetch = true;
+      }
+
+      // -------------------------
+      // 3. Month + Year
+      // -------------------------
+      const today = new Date();
+      const month = today.getMonth() + 1;
+      const year = today.getFullYear();
+
+      // -------------------------
+      // 4. Dynamic cache key
+      // -------------------------
+      const cacheKey = `prayer_${loc.latitude}_${loc.longitude}_${month}_${year}_${method}_${school}`;
+
+      const cached = await AsyncStorage.getItem(cacheKey);
+
+      let monthlyData;
+
+      // -------------------------
+      // 5. Fetch or use cache
+      // -------------------------
+      if (cached && !shouldRefetch) {
+        monthlyData = JSON.parse(cached);
+      } else {
+        monthlyData = await fetchMonthlyPrayerTimes(
+          loc.latitude,
+          loc.longitude,
+          method,
+          school === "hanafi" ? 1 : 0
+        );
+
+        await AsyncStorage.setItem(cacheKey, JSON.stringify(monthlyData));
+        await AsyncStorage.setItem("last_location", JSON.stringify(loc));
+      }
+
+      // -------------------------
+      // 6. Today's data
+      // -------------------------
+      const todayIndex = today.getDate() - 1;
+      const todayData = monthlyData[todayIndex];
+
+      if (!todayData) {
         setLoading(false);
         return;
       }
+
+      const todayTimings = todayData.timings;
+      const hijri = todayData.date.hijri;
+
+      setPrayerTimes(todayTimings);
+
+      // Ramadan check
+      setIsRamadan(hijri.month.number === 9);
+
+      // Hijri display
+      setHijriDate(`${hijri.day} ${hijri.month.en} ${hijri.year}`);
+
+      // -------------------------
+      // 7. Notifications (optional)
+      // -------------------------
+      // const granted = await requestNotificationPermission();
+      // if (granted) {
+      //   await schedulePrayerNotifications(todayTimings);
+      // }
+
+      setLoading(false);
+    } catch (error) {
+      console.log("PrayerTimes error:", error);
+      setLoading(false);
     }
-
-    setCity(loc.city);
-    setLocation({ latitude: loc.latitude, longitude: loc.longitude });
-
-    let shouldRefetch = false;
-
-    if (lastLocationStr) {
-      const last = JSON.parse(lastLocationStr);
-
-      const distance = getDistanceKm(
-        last.latitude,
-        last.longitude,
-        loc.latitude,
-        loc.longitude
-      );
-
-      if (distance > 20) shouldRefetch = true;
-    } else {
-      shouldRefetch = true;
-    }
-    // 2. Check cache
-    const cached = await AsyncStorage.getItem("monthly_prayers");
-
-    let monthlyData;
-
-    if (cached) {
-      monthlyData = JSON.parse(cached);
-    } else {
-      monthlyData = await fetchMonthlyPrayerTimes(
-        loc.latitude,
-        loc.longitude,
-        method,
-        school === "hanafi" ? 1 : 0  // force hanafi for better accuracy in subcontinent
-      );
-      await AsyncStorage.setItem(
-        "monthly_prayers",
-        JSON.stringify(monthlyData)
-      );
-    }
-    if (!cached || shouldRefetch) {
-      monthlyData = await fetchMonthlyPrayerTimes(
-        loc.latitude,
-        loc.longitude,
-        method,
-        school === "hanafi" ? 1 : 0 // force hanafi for better accuracy in subcontinent
-      );
-
-      await AsyncStorage.setItem(
-        "monthly_prayers",
-        JSON.stringify(monthlyData)
-      );
-
-      await AsyncStorage.setItem("last_location", JSON.stringify(loc));
-    }
-
-    // 3. Get today's prayers
-    const todayIndex = new Date().getDate() - 1;
-    const todayTimings = monthlyData[todayIndex].timings;
-    const hijri = monthlyData[todayIndex].date.hijri;
-    //console.log("Today's Hijri date:", hijri);
-    setPrayerTimes(todayTimings);
-    setIsRamadan(hijri.number === 9);
-    setHijriDate(`${hijri.day} ${hijri.month.en} ${hijri.year}`);
-    // 4. Schedule notifications (commented out for now, can be enabled later)
-    // const granted = await requestNotificationPermission();
-    // if (granted) {
-    //   await schedulePrayerNotifications(todayTimings);
-    // }
-
-    setLoading(false);
   };
 
   return { loading };

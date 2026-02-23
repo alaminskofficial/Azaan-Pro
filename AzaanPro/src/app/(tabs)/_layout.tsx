@@ -11,7 +11,6 @@ export default function TabsLayout() {
   return (
     <Tabs
       screenOptions={{
-        headerShown: false,
         tabBarStyle: {
           backgroundColor: colors.surface,
           borderTopColor: colors.border,
@@ -25,6 +24,7 @@ export default function TabsLayout() {
         options={{
           headerTitle: "Home",
           title: "Home",
+          headerShown: false,
           tabBarIcon: ({ color }) => (
             <Entypo name="home" size={24} color={color} />
           ),

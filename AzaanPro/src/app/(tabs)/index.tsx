@@ -33,7 +33,7 @@ import {
     if (loading) {
       return (
         <View style={styles.center}>
-          <ActivityIndicator size="large" color="#6C63FF" />
+          <ActivityIndicator size="large" color={colors.primary} />
           <Text style={{ color: "#fff" }}>Loading prayer times...</Text>
         </View>
       );
@@ -56,8 +56,10 @@ import {
           {prayerInfo && (
             <CountdownCard
               current={prayerInfo.current}
+              currentTime={prayerInfo.currentTime}
               next={prayerInfo.next}
               nextTime={prayerInfo.nextTime}
+              
             />
           )}
   

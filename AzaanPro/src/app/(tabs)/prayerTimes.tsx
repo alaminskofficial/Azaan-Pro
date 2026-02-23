@@ -2,14 +2,12 @@ import { View, Text, ActivityIndicator, StyleSheet } from "react-native";
 
 import { usePrayerTimes } from "@/hooks/usePrayerTimes";
 import { useAppStore } from "@/store/appStore";
-import { getCurrentAndNextPrayer } from "@/utils/prayerUtils";
+
 
 export default function PrayerTimes() {
   const { loading } = usePrayerTimes();
   const prayers = useAppStore((s) => s.prayerTimes);
   console.log("Prayer times:", prayers);
-  const prayerInfo = prayers ? getCurrentAndNextPrayer(prayers) : null;
-  const isRamadan = useAppStore((s) => s.isRamadan);
 
   if (loading) {
     return (
@@ -29,7 +27,7 @@ export default function PrayerTimes() {
       <Text>Maghrib (Iftar): {prayers.Maghrib}</Text>
       <Text>Isha: {prayers.Isha}</Text>
       {/* <Text>Midnight: {prayers.Midnight}</Text> */}
-      <Text>Qiyam: {prayers.qiyam}</Text>
+      <Text>Qiyam: {prayers.Lastthird}</Text>
       <Text>Sehri Ends (Imsak): {prayers.Imsak}</Text>
     </View>
   );
