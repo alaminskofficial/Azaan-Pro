@@ -27,9 +27,8 @@ import {
     const { loading } = usePrayerTimes();
     const prayers = useAppStore((s) => s.prayerTimes);
     const isRamadan = useAppStore((s) => s.isRamadan);
-  
     const prayerInfo = prayers ? getCurrentAndNextPrayer(prayers) : null;
-  
+    
     if (loading) {
       return (
         <View style={styles.center}>

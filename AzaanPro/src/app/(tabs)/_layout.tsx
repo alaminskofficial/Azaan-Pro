@@ -40,7 +40,7 @@ export default function TabsLayout() {
           ),
         }}
       />
-      <Tabs.Screen
+      {/* <Tabs.Screen
         name="qibla"
         options={{
           headerTitle: "Qibla",
@@ -68,6 +68,38 @@ export default function TabsLayout() {
           title: "Profile",
           tabBarIcon: ({ color }) => (
             <FontAwesome5 name="user-astronaut" size={24} color={color} />
+          ),
+        }}
+      /> */}
+
+      <Tabs.Screen
+        name="quran"
+        options={{
+          headerTitle: "Quran",
+          title: "Quran",
+          tabBarIcon: ({ color }) => (
+            <FontAwesome5 name="book-open" size={24} color={color} />
+          ),
+        }}
+      />
+      <Tabs.Screen
+        name="dua"
+        options={{
+          headerTitle: "Duas",
+          title: "Duas",
+          tabBarIcon: ({ color }) => (
+            <FontAwesome5 name="praying-hands" size={24} color={color} />
+          ),
+        }}
+      />
+
+      <Tabs.Screen
+        name="more"
+        options={{
+          headerTitle: "More Features",
+          title: "More",
+          tabBarIcon: ({ color }) => (
+            <Entypo name="dots-three-horizontal" size={24} color={color} />
           ),
         }}
       />

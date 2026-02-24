@@ -10,13 +10,14 @@ import {
 } from "@/services/notificationService";
 
 export const usePrayerTimes = () => {
-  const setCity = useAppStore((s) => s.setCity);
-  const setLocation = useAppStore((s) => s.setLocation);
+  const setCity = useAppStore((s) => s.setCity); // later also we can add this to settings and make it more dynamic once user manually selects city from search instead of auto location detection
+  const setLocation = useAppStore((s) => s.setLocation); // later also we can add this to settings and make it dynamic
   const setPrayerTimes = useAppStore((s) => s.setPrayerTimes);
-  const method = useAppStore((s) => s.method);
+  const setMonthlyPrayerTimes = useAppStore((s) => s.setMonthlyPrayerTimes);
+  const method = useAppStore((s) => s.method); 
   const setHijriDate = useAppStore((s) => s.setHijriDate);
   const setIsRamadan = useAppStore((s) => s.setIsRamadan);
-  const school = useAppStore((s) => s.madhab);
+  const school = useAppStore((s) => s.madhab); 
 
   const [loading, setLoading] = useState(true);
 
@@ -119,6 +120,7 @@ export const usePrayerTimes = () => {
       const hijri = todayData.date.hijri;
 
       setPrayerTimes(todayTimings);
+      setMonthlyPrayerTimes(monthlyData);
 
       // Ramadan check
       setIsRamadan(hijri.month.number === 9);

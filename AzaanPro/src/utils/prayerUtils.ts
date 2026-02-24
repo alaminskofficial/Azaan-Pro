@@ -3,7 +3,7 @@ export function getCurrentAndNextPrayer(timings: any) {
 
   // Dynamic prayer order (can be reused anywhere)
   const prayerOrder = ["Fajr","Sunrise", "Dhuhr", "Asr", "Maghrib", "Isha"];
-
+  
   // Convert to array of objects
   const todayTimes = prayerOrder.map((name) => {
     const [hour, minute] = timings[name].split(":");

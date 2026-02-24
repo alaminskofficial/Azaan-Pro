@@ -1,8 +1,10 @@
-import { View, Text, StyleSheet } from "react-native";
+import { View, Text, StyleSheet , TouchableOpacity } from "react-native";
 import { useCountdown } from "@/hooks/useCountDown";
 import { colors } from "@/theme/color";
 import Svg, { Circle } from "react-native-svg";
 import { useMemo } from "react";
+import { useRouter } from "expo-router";
+import { Ionicons } from "@expo/vector-icons";
 
 export default function CountDownCard({
   current,
@@ -11,6 +13,7 @@ export default function CountDownCard({
   nextTime,
 }: any) {
   const { time, ms } = useCountdown(nextTime);
+  const router = useRouter();
 
   const ONE_HOUR_MS = 60 * 60 * 1000;
 
@@ -29,6 +32,9 @@ export default function CountDownCard({
   const strokeWidth = 8;
   const circumference = 2 * Math.PI * radius;
   const strokeDashoffset = circumference - progress * circumference;
+  const goToPrayers = () => {
+    router.push("/(tabs)/prayerTimes"); 
+  };
 
   return (
     <View style={styles.card}>
@@ -44,7 +50,18 @@ export default function CountDownCard({
             : currentTime}
         </Text>
 
-        <Text style={styles.viewAll}>View All Prayers</Text>
+        <TouchableOpacity
+          style={styles.viewAllContainer}
+          onPress={goToPrayers}
+          activeOpacity={0.7}
+        >
+          <Text style={styles.viewAll}>View All Prayers</Text>
+          <Ionicons
+            name="chevron-forward"
+            size={16}
+            color={colors.primary}
+          />
+        </TouchableOpacity>
       </View>
 
       {/* Show only if next prayer is within 1 hour */}
@@ -99,7 +116,10 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     alignItems: "center",
   },
-  left: { flex: 1 },
+
+  left: {
+    flex: 1,
+  },
 
   prayerName: {
     fontSize: 32,
@@ -113,10 +133,16 @@ const styles = StyleSheet.create({
     marginTop: 5,
   },
 
-  viewAll: {
+  viewAllContainer: {
+    flexDirection: "row",
+    alignItems: "center",
     marginTop: 15,
+  },
+
+  viewAll: {
     color: colors.primary,
-    fontWeight: "500",
+    fontWeight: "600",
+    marginRight: 4,
   },
 
   right: {

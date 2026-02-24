@@ -72,7 +72,7 @@ const styles = StyleSheet.create({
     margin: 20,
     padding: 20,
     backgroundColor: colors.surface,
-    borderRadius: 16,
+    borderRadius: 20,
   },
   title: {
     fontSize: 16,
@@ -97,8 +97,8 @@ const styles = StyleSheet.create({
   },
   countdownBox: {
     backgroundColor: colors.primary,
-    padding: 15,
-    borderRadius: 12,
+    padding: 6,
+    borderRadius: 5,
     alignItems: "center",
   },
   countdownLabel: {
@@ -107,8 +107,8 @@ const styles = StyleSheet.create({
   },
   timer: {
     color: "#fff",
-    fontSize: 24,
+    fontSize: 20,
     fontWeight: "bold",
-    marginTop: 5,
+    marginTop: 4,
   },
 });

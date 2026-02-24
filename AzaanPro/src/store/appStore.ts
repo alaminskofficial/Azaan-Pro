@@ -4,6 +4,7 @@ interface AppState {
   city: string;
   location: { latitude: number; longitude: number } | null;
   prayerTimes: any;
+  monthlyPrayerTimes: any;
   method: number;
   madhab: string;
   hijriDate: string;
@@ -12,6 +13,7 @@ interface AppState {
   setCity: (city: string) => void;
   setLocation: (loc: any) => void;
   setPrayerTimes: (times: any) => void;
+  setMonthlyPrayerTimes: (times: any) => void;
   setHijriDate: (date: string) => void;
   setIsRamadan: (isRamadan: boolean) => void;
   setMethod: (method: number) => void;
@@ -22,6 +24,7 @@ export const useAppStore = create<AppState>((set) => ({
   city: "",
   location: null,
   prayerTimes: null,
+  monthlyPrayerTimes: null,
   method: 1, // kar(Ind) be default
   madhab: "hanafi",
   hijriDate: "",
@@ -29,6 +32,7 @@ export const useAppStore = create<AppState>((set) => ({
   setCity: (city) => set({ city }),
   setLocation: (location) => set({ location }),
   setPrayerTimes: (times) => set({ prayerTimes: times }),
+  setMonthlyPrayerTimes: (times) => set({ monthlyPrayerTimes: times }),
   setHijriDate: (date) => set({ hijriDate: date }),
   setIsRamadan: (isRamadan) => set({ isRamadan }),
   setMethod: (method) => set({ method }),
