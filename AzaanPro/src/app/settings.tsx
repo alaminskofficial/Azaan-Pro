@@ -1,23 +1,115 @@
-import { View, Text, Button } from "react-native";
+import React from "react";
+import { View, Text, StyleSheet } from "react-native";
+import { Picker } from "@react-native-picker/picker";
 import { useAppStore } from "@/store/appStore";
+import { colors } from "@/theme/color";
+import { getMethodName, METHOD_IDS } from "@/utils/methodUtils";
 
 export default function Settings() {
+  const method = useAppStore((s) => s.method);
+  const madhab = useAppStore((s) => s.madhab);
   const setMethod = useAppStore((s) => s.setMethod);
   const setMadhab = useAppStore((s) => s.setMadhab);
 
-  return (
-    <View style={{ padding: 20 }}>
-      <Text style={{ marginTop: 20, color: "white", textAlign: "center" }}>
-        Calculation Method
-      </Text>
-      <Button title="Karachi" onPress={() => setMethod(1)} />
-      <Button title="Umm al-Qura" onPress={() => setMethod(4)} />
+  const METHODS = METHOD_IDS.map((id) => ({
+    id,
+    name: getMethodName(id),
+  }));
 
-      <Text style={{ marginTop: 20, color: "white", textAlign: "center" }}>
-        Madhab
-      </Text>
-      <Button title="Hanafi" onPress={() => setMadhab("hanafi")} />
-      <Button title="Shafi" onPress={() => setMadhab("shafi")} />
+  return (
+    <View style={styles.container}>
+      <Text style={styles.header}>Prayer Settings</Text>
+
+      {/* Calculation Method */}
+      <View style={styles.card}>
+        <Text style={styles.label}>Calculation Method :</Text>
+
+        <View style={styles.pickerWrapper}>
+          <Picker
+            selectedValue={method}
+            dropdownIconColor={colors.primary} // arrow color
+            onValueChange={(itemValue) => setMethod(itemValue)}
+            style={[styles.picker, { color: colors.textPrimary }]} // text color
+            itemStyle={{ color: colors.textPrimary }}
+          >
+            {METHODS.map((m) => (
+              <Picker.Item
+                key={m.id}
+                label={m.name}
+                value={m.id}
+                color={colors.surface}
+              />
+            ))}
+          </Picker>
+        </View>
+      </View>
+
+      {/* Madhab */}
+      <View style={styles.card}>
+        <Text style={styles.label}>Juristic Method (Madhab) :</Text>
+
+        <View style={styles.pickerWrapper}>
+          <Picker
+            selectedValue={madhab.toLowerCase()}
+            dropdownIconColor={colors.primaryLight}
+            onValueChange={(value) => setMadhab(value)}
+            style={[styles.picker, { color: colors.textPrimary }]} // text color
+            itemStyle={{ color: colors.textPrimary }}
+          >
+            <Picker.Item
+              label="Hanafi"
+              value="hanafi"
+              color={colors.surfaceLight}
+            />
+            <Picker.Item
+              label="Shafi/Maliki/Hanbali"
+              value="shafi"
+              color={colors.surfaceLight}
+            />
+          </Picker>
+        </View>
+      </View>
     </View>
   );
 }
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: colors.background,
+    padding: 20,
+  },
+
+  header: {
+    fontSize: 22,
+    fontWeight: "600",
+    color: colors.textPrimary,
+    marginBottom: 25,
+  },
+
+  card: {
+    backgroundColor: colors.surface,
+    padding: 18,
+    borderRadius: 16,
+    marginBottom: 20,
+    borderWidth: 1,
+    borderColor: colors.border,
+  },
+
+  label: {
+    fontSize: 14,
+    color: colors.textSecondary,
+    marginBottom: 8,
+  },
+
+  pickerWrapper: {
+    backgroundColor: colors.background,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: colors.border,
+    overflow: "hidden",
+  },
+
+  picker: {
+    color: colors.success,
+  },
+});

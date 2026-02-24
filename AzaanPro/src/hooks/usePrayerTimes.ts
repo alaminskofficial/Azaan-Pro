@@ -131,10 +131,10 @@ export const usePrayerTimes = () => {
       // -------------------------
       // 7. Notifications (optional)
       // -------------------------
-      // const granted = await requestNotificationPermission();
-      // if (granted) {
-      //   await schedulePrayerNotifications(todayTimings);
-      // }
+      const granted = await requestNotificationPermission();
+      if (granted) {
+        await schedulePrayerNotifications(todayTimings);
+      }
 
       setLoading(false);
     } catch (error) {

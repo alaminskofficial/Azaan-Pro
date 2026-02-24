@@ -1,11 +1,13 @@
-import { View, Text, StyleSheet } from "react-native";
+import { View, Text, StyleSheet, TouchableOpacity } from "react-native";
 import { useAppStore } from "../store/appStore";
 import tailwind from "twrnc";
 import { colors } from "@/theme/color";
+import { useRouter } from "expo-router";
 
 export default function Header() {
   const city = useAppStore((s) => s.city);
   const hijriDate = useAppStore((s) => s.hijriDate);
+  const router = useRouter();
 
   return (
     <View
@@ -13,7 +15,9 @@ export default function Header() {
     >
       <Text style={styles.logo}>Azaan Pro</Text>
       <View>
-        <Text style={[tailwind`text-lg font-bold`, { color: colors.textSecondary}]}>
+        <Text
+          style={[tailwind`text-lg font-bold`, { color: colors.textSecondary }]}
+        >
           {city}
         </Text>
         <Text style={{ color: colors.textSecondary }}>{hijriDate}</Text>
@@ -21,12 +25,13 @@ export default function Header() {
 
       <View style={tailwind`flex-row gap-3`}>
         {/* <View style={tailwind`w-8 h-8 bg-purple-500 rounded-full`} /> */}
-        <View style={tailwind`w-8 h-8 bg-gray-600 rounded-full`} />
+        <TouchableOpacity onPress={() => router.push("/profile")}>
+          <View style={tailwind`w-8 h-8 bg-gray-600 rounded-full`} />
+        </TouchableOpacity>
       </View>
     </View>
   );
 }
-
 
 const styles = StyleSheet.create({
   container: {

@@ -46,7 +46,7 @@ const features = [
   //   route: "/umrah",
   // },
   {
-    name: "Settings",
+    name: "App Settings",
     icon: "settings",
     route: "/settings",
   },
@@ -55,6 +55,11 @@ const features = [
     icon: "compass",
     route: "/compass",
   },
+  {
+    name : "profile",
+    icon : "person",
+    route : "/profile"
+  }
   // {
   //   name: "Help",
   //   icon: "help-circle",

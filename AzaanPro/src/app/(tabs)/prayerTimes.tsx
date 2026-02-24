@@ -93,7 +93,7 @@ export default function PrayerTimesScreen() {
         <PrayerRow name="Asr" time={cleanTime(t?.Asr)} active={currentPrayer === "Asr"} />
         <PrayerRow
           name="Maghrib / Iftar"
-          time={(t?.Maghrib)}
+          time={cleanTime(t?.Maghrib)}
           active={currentPrayer === "Maghrib"}
         />
         <PrayerRow name="Isha" time={cleanTime(t?.Isha)} active={currentPrayer === "Isha"} />

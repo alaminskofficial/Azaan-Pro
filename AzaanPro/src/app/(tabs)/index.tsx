@@ -18,7 +18,7 @@ import {
   
   const stories = [
     { id: "1", img: "https://picsum.photos/200/300" },
-    { id: "2", img: "https://picsum.photos/201/300" },
+    { id: "2", img: "https://picsum.photos/203/300" },
     { id: "3", img: "https://picsum.photos/202/300" },
     { id: "4", img: "https://picsum.photos/203/300" },
   ];
