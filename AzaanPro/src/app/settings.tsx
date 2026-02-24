@@ -37,7 +37,7 @@ export default function Settings() {
                 key={m.id}
                 label={m.name}
                 value={m.id}
-                color={colors.surface}
+                color={colors.textPrimary}
               />
             ))}
           </Picker>
@@ -59,12 +59,12 @@ export default function Settings() {
             <Picker.Item
               label="Hanafi"
               value="hanafi"
-              color={colors.surfaceLight}
+              color={colors.textPrimary}
             />
             <Picker.Item
               label="Shafi/Maliki/Hanbali"
               value="shafi"
-              color={colors.surfaceLight}
+              color={colors.textPrimary}
             />
           </Picker>
         </View>
