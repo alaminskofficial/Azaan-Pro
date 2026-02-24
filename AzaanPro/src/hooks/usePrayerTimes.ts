@@ -14,10 +14,10 @@ export const usePrayerTimes = () => {
   const setLocation = useAppStore((s) => s.setLocation); // later also we can add this to settings and make it dynamic
   const setPrayerTimes = useAppStore((s) => s.setPrayerTimes);
   const setMonthlyPrayerTimes = useAppStore((s) => s.setMonthlyPrayerTimes);
-  const method = useAppStore((s) => s.method); 
+  const method = useAppStore((s) => s.method);
   const setHijriDate = useAppStore((s) => s.setHijriDate);
   const setIsRamadan = useAppStore((s) => s.setIsRamadan);
-  const school = useAppStore((s) => s.madhab); 
+  const school = useAppStore((s) => s.madhab);
 
   const [loading, setLoading] = useState(true);
 
@@ -131,9 +131,17 @@ export const usePrayerTimes = () => {
       // -------------------------
       // 7. Notifications (optional)
       // -------------------------
-      const granted = await requestNotificationPermission();
-      if (granted) {
-        await schedulePrayerNotifications(todayTimings);
+      // after todayTimings is set
+
+      const todayKey = `notifications_${today.toDateString()}`;
+      const alreadyScheduled = await AsyncStorage.getItem(todayKey);
+
+      if (!alreadyScheduled) {
+        const granted = await requestNotificationPermission();
+        if (granted) {
+          await schedulePrayerNotifications(todayTimings);
+          await AsyncStorage.setItem(todayKey, "true");
+        }
       }
 
       setLoading(false);

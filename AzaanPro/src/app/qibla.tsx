@@ -1,159 +1,191 @@
+import React, { useEffect, useRef, useState } from "react";
 import {
   View,
   Text,
   StyleSheet,
+  Animated,
   TouchableOpacity,
   ActivityIndicator,
-  Animated,
 } from "react-native";
-import { useEffect, useRef, useState } from "react";
 import * as Location from "expo-location";
 import { Magnetometer } from "expo-sensors";
-import { useAppStore } from "@/store/appStore";
 import { colors } from "@/theme/color";
 
-export default function QiblaScreen() {
-  const storeLocation = useAppStore((s) => s.location);
+const KAABA_LAT = 21.4225;
+const KAABA_LNG = 39.8262;
 
-  const [location, setLocation] = useState(storeLocation);
-  const [qibla, setQibla] = useState<number | null>(null);
+/* ---------------- Qibla Calculation ---------------- */
+const getQiblaDirection = (userLat: number, userLng: number) => {
+  const toRad = (deg: number) => (deg * Math.PI) / 180;
+  const toDeg = (rad: number) => (rad * 180) / Math.PI;
+
+  const dLng = toRad(KAABA_LNG - userLng);
+
+  const y = Math.sin(dLng) * Math.cos(toRad(KAABA_LAT));
+  const x =
+    Math.cos(toRad(userLat)) * Math.sin(toRad(KAABA_LAT)) -
+    Math.sin(toRad(userLat)) *
+      Math.cos(toRad(KAABA_LAT)) *
+      Math.cos(dLng);
+
+  const bearing = toDeg(Math.atan2(y, x));
+  return (bearing + 360) % 360;
+};
+
+export default function QiblaCompassScreen() {
   const [heading, setHeading] = useState(0);
-  const [loading, setLoading] = useState(false);
-  const [calibrate, setCalibrate] = useState(false);
+  const [qibla, setQibla] = useState<number | null>(null);
+  const [loading, setLoading] = useState(true);
 
   const needleRotate = useRef(new Animated.Value(0)).current;
+  const dialRotate = useRef(new Animated.Value(0)).current;
+  const lastAngle = useRef(0);
 
-  /* ---------------- Fetch Qibla ---------------- */
-  const fetchQibla = async (lat: number, lng: number) => {
-    try {
-      setLoading(true);
-      const res = await fetch(
-        `https://api.aladhan.com/v1/qibla/${lat}/${lng}`
-      );
-      const json = await res.json();
-      setQibla(json.data.direction);
-    } catch (e) {
-      console.log("Qibla error", e);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    if (location) {
-      fetchQibla(location.latitude, location.longitude);
-    }
-  }, [location]);
-
-  /* ---------------- Use Current Location ---------------- */
+  /* ---------------- Location ---------------- */
   const useCurrentLocation = async () => {
-    const { status } = await Location.requestForegroundPermissionsAsync();
-    if (status !== "granted") return;
+    setLoading(true);
+
+    const { status } =
+      await Location.requestForegroundPermissionsAsync();
+    if (status !== "granted") {
+      setLoading(false);
+      return;
+    }
 
     const loc = await Location.getCurrentPositionAsync({});
-    setLocation({
-      latitude: loc.coords.latitude,
-      longitude: loc.coords.longitude,
-    });
+    const direction = getQiblaDirection(
+      loc.coords.latitude,
+      loc.coords.longitude
+    );
+
+    setQibla(direction);
+    setLoading(false);
   };
 
-  /* ---------------- Compass Sensor ---------------- */
   useEffect(() => {
-    const sub = Magnetometer.addListener((data) => {
-      let angle = Math.atan2(data.y, data.x) * (180 / Math.PI);
-      angle = angle >= 0 ? angle : angle + 360;
+    useCurrentLocation();
+  }, []);
 
-      setHeading(angle);
+  /* ---------------- Magnetometer ---------------- */
+  useEffect(() => {
+    const subscription = Magnetometer.addListener((data) => {
+      let angle = Math.atan2(-data.x, data.y) * (180 / Math.PI);
+      if (angle < 0) angle += 360;
 
-      if (data.x === 0 && data.y === 0) {
-        setCalibrate(true);
-      } else {
-        setCalibrate(false);
+      // Smooth transition
+      const smooth =
+        lastAngle.current +
+        (angle - lastAngle.current) * 0.15;
+      lastAngle.current = smooth;
+
+      setHeading(smooth);
+
+      // Rotate Dial (real compass behavior)
+      Animated.timing(dialRotate, {
+        toValue: -smooth,
+        duration: 80,
+        useNativeDriver: true,
+      }).start();
+
+      // Rotate Needle toward Qibla
+      if (qibla !== null) {
+        let direction = qibla - smooth;
+        direction = ((direction + 540) % 360) - 180;
+
+        Animated.timing(needleRotate, {
+          toValue: direction,
+          duration: 80,
+          useNativeDriver: true,
+        }).start();
       }
     });
 
-    Magnetometer.setUpdateInterval(150);
-    return () => sub.remove();
-  }, []);
+    Magnetometer.setUpdateInterval(120);
+    return () => subscription.remove();
+  }, [qibla]);
 
-  /* ---------------- Needle Animation ---------------- */
-  useEffect(() => {
-    if (qibla === null) return;
+  const dialRotateInterpolate = dialRotate.interpolate({
+    inputRange: [-360, 360],
+    outputRange: ["-360deg", "360deg"],
+  });
 
-    // normalize angle between -180 and 180 (prevents long rotation)
-    let direction = qibla - heading;
-    direction = ((direction + 540) % 360) - 180;
-
-    Animated.timing(needleRotate, {
-      toValue: direction,
-      duration: 120,
-      useNativeDriver: true,
-    }).start();
-  }, [heading, qibla]);
-
-  const rotateInterpolate = needleRotate.interpolate({
+  const needleRotateInterpolate = needleRotate.interpolate({
     inputRange: [-180, 180],
     outputRange: ["-180deg", "180deg"],
   });
 
   const isFacing =
-  qibla !== null &&
-  Math.abs(((heading - qibla + 540) % 360) - 180) < 5; 
+    qibla !== null &&
+    Math.abs(((heading - qibla + 540) % 360) - 180) < 5;
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Qibla Finder</Text>
+      <Text style={styles.title}>Qibla Direction</Text>
 
-      {loading || qibla === null ? (
-        <ActivityIndicator size="large" color={colors.primary} />
+      {loading ? (
+        <ActivityIndicator
+          size="large"
+          color={colors.primary}
+          style={{ marginVertical: 30 }}
+        />
       ) : (
-        <View style={styles.compassContainer}>
-          {/* Compass Circle */}
-          {/* Static N, S, E, W labels  we will update it with image later*/}
-          <View style={styles.compassCircle}>
-            <Text style={styles.north}>N</Text>
-            <Text style={styles.south}>S</Text>
-            <Text style={styles.east}>E</Text>
-            <Text style={styles.west}>W</Text>
+        <>
+          <Text style={styles.info}>
+            Heading: {Math.round(heading)}°
+          </Text>
 
-            {/* Needle */}
+          <Text style={styles.info}>
+            Qibla: {qibla !== null ? Math.round(qibla) : "--"}°
+          </Text>
+
+          {isFacing && (
+            <Text style={styles.facing}>
+              ✔ You are facing Qibla
+            </Text>
+          )}
+
+          {/* Compass */}
+          <View style={styles.wrapper}>
+            {/* Rotating Dial */}
             <Animated.View
               style={[
-                styles.needleContainer,
-                { transform: [{ rotate: rotateInterpolate }] },
+                styles.dial,
+                { transform: [{ rotate: dialRotateInterpolate }] },
               ]}
             >
-              <View style={styles.needle} />
-              <View style={styles.arrowHead} />
+              <Text style={[styles.label, { top: 15 }]}>N</Text>
+              <Text style={[styles.label, { bottom: 15 }]}>S</Text>
+              <Text style={[styles.label, { left: 15 }]}>W</Text>
+              <Text style={[styles.label, { right: 15 }]}>E</Text>
             </Animated.View>
+
+            {/* Needle */}
+            {qibla !== null && (
+              <Animated.View
+                style={[
+                  styles.needleContainer,
+                  {
+                    transform: [
+                      { rotate: needleRotateInterpolate },
+                    ],
+                  },
+                ]}
+              >
+                <View style={styles.needle} />
+              </Animated.View>
+            )}
           </View>
-        </View>
+
+          <TouchableOpacity
+            style={styles.button}
+            onPress={useCurrentLocation}
+          >
+            <Text style={styles.buttonText}>
+              Refresh Location
+            </Text>
+          </TouchableOpacity>
+        </>
       )}
-
-      <Text style={styles.info}>
-        Heading: {Math.round(heading)}°
-      </Text>
-
-      <Text style={styles.info}>
-        Qibla: {qibla ? Math.round(qibla) : "--"}°
-      </Text>
-
-      {calibrate && (
-        <Text style={styles.calibrate}>
-          Move phone in 8 shape to calibrate compass
-        </Text>
-      )}
-      {isFacing && (
-        <Text style={styles.facing}>
-          ✔ You are facing Qibla
-        </Text>
-      )}
-
-      <TouchableOpacity style={styles.button} onPress={useCurrentLocation}>
-        <Text style={styles.buttonText}>
-          Use Current Location
-        </Text>
-      </TouchableOpacity>
     </View>
   );
 }
@@ -164,32 +196,53 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: colors.background,
-    alignItems: "center",
     justifyContent: "center",
+    alignItems: "center",
   },
 
   title: {
-    fontSize: 22,
+    fontSize: 24,
+    fontWeight: "600",
+    color: colors.primary,
+    marginBottom: 10,
+  },
+
+  info: {
+    fontSize: 16,
     color: colors.textPrimary,
-    marginBottom: 20,
+    marginTop: 4,
+  },
+
+  facing: {
+    marginTop: 10,
+    color: colors.success,
     fontWeight: "600",
   },
 
-  compassContainer: {
+  wrapper: {
     width: 280,
     height: 280,
-    alignItems: "center",
     justifyContent: "center",
+    alignItems: "center",
+    marginVertical: 30,
   },
 
-  compassCircle: {
+  dial: {
+    position: "absolute",
     width: 260,
     height: 260,
     borderRadius: 130,
-    borderWidth: 4,
+    borderWidth: 3,
     borderColor: colors.primary,
-    alignItems: "center",
     justifyContent: "center",
+    alignItems: "center",
+  },
+
+  label: {
+    position: "absolute",
+    fontSize: 18,
+    fontWeight: "bold",
+    color: colors.primary,
   },
 
   needleContainer: {
@@ -199,78 +252,20 @@ const styles = StyleSheet.create({
 
   needle: {
     width: 4,
-    height: 110,
-    backgroundColor: colors.primary,
+    height: 130,
+    backgroundColor: colors.error,
     borderRadius: 2,
   },
 
-  arrowHead: {
-    width: 0,
-    height: 0,
-    borderLeftWidth: 10,
-    borderRightWidth: 10,
-    borderBottomWidth: 20,
-    borderLeftColor: "transparent",
-    borderRightColor: "transparent",
-    borderBottomColor: colors.primary,
-    marginTop: -5,
-  },
-
-  north: {
-    position: "absolute",
-    top: 10,
-    fontWeight: "bold",
-    color: colors.primary,
-  },
-
-  south: {
-    position: "absolute",
-    bottom: 10,
-    fontWeight: "bold",
-    color: colors.primary,
-  },
-
-  east: {
-    position: "absolute",
-    right: 10,
-    fontWeight: "bold",
-    color: colors.primary,
-  },
-
-  west: {
-    position: "absolute",
-    left: 10,
-    fontWeight: "bold",
-    color: colors.primary,
-  },
-
-  info: {
-    color: colors.textSecondary,
-    marginTop: 8,
-    fontSize: 15,
-  },
-
-  calibrate: {
-    marginTop: 10,
-    color: colors.warning,
-    fontSize: 13,
-  },
-
   button: {
-    marginTop: 30,
     backgroundColor: colors.primary,
-    paddingHorizontal: 22,
+    paddingHorizontal: 24,
     paddingVertical: 12,
     borderRadius: 10,
   },
 
   buttonText: {
     color: colors.textPrimary,
-    fontWeight: "600",
-  },
-  facing: {
-    marginTop: 10,
-    color: colors.success,
     fontWeight: "600",
   },
 });
