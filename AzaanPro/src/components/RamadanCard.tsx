@@ -69,12 +69,18 @@ export default function RamadanCard({ timings }: any) {
 
 const styles = StyleSheet.create({
   container: {
-    margin: 20,
-    padding: 20,
+    flex: 1,
+    textAlignVertical: "center",
+    paddingVertical: 12,
+    paddingHorizontal: 16,
+    borderRadius: 12,
+    marginBottom: 10,
+    textAlign: "center",
     backgroundColor: colors.surface,
-    borderRadius: 20,
+    
   },
   title: {
+    textAlign: "center",
     fontSize: 16,
     fontWeight: "600",
     color: colors.textPrimary,
@@ -102,11 +108,11 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   countdownLabel: {
-    color: "#fff",
+    color: colors.textPrimary,
     fontSize: 14,
   },
   timer: {
-    color: "#fff",
+    color: colors.textPrimary,
     fontSize: 20,
     fontWeight: "bold",
     marginTop: 4,

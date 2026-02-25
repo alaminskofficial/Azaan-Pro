@@ -15,6 +15,7 @@ import {
   import RamadanCard from "@/components/RamadanCard";
   import NotificationBanner from "@/components/NotificationsBanner";
   import { colors } from "@/theme/color";
+  import RamadanBanner from "@/components/RamadanBanner";
   
   const stories = [
     { id: "1", img: "https://picsum.photos/200/300" },
@@ -66,6 +67,7 @@ import {
           <NotificationBanner />
   
           {/* Ramadan Card */}
+          {isRamadan && ( <RamadanBanner /> )}
           {isRamadan && <RamadanCard timings={prayers} />}
   
           {/* Latest Stories */}
@@ -79,7 +81,7 @@ import {
               <Image source={{ uri: item.img }} style={styles.storyImage} />
             )}
           />
-  
+          
           {/* Goals Progress */}
           <View style={styles.goalCard}>
             <Text style={styles.goalTitle}>Complete 5 more goals today</Text>
@@ -118,7 +120,7 @@ const styles = StyleSheet.create({
     color: colors.textPrimary,
     fontSize: 18,
     fontWeight: "600",
-    marginTop: 20,
+    marginTop: 10,
     marginBottom: 10,
   },
 

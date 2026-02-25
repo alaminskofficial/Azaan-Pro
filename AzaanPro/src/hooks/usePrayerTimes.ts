@@ -8,6 +8,7 @@ import {
   requestNotificationPermission,
   schedulePrayerNotifications,
 } from "@/services/notificationService";
+import { applyHijriOffset } from "@/utils/hijriUtils";
 
 export const usePrayerTimes = () => {
   const setCity = useAppStore((s) => s.setCity); // later also we can add this to settings and make it more dynamic once user manually selects city from search instead of auto location detection
@@ -117,16 +118,21 @@ export const usePrayerTimes = () => {
       }
 
       const todayTimings = todayData.timings;
-      const hijri = todayData.date.hijri;
+      const hijriRaw = todayData.date.hijri;
+      const offset = useAppStore.getState().hijriOffset;
+      console.log("Hijri raw:", hijriRaw, "Offset:", offset);
+
+      // India adjustment
+      const hijri = applyHijriOffset(hijriRaw, offset);
 
       setPrayerTimes(todayTimings);
       setMonthlyPrayerTimes(monthlyData);
 
       // Ramadan check
-      setIsRamadan(hijri.month.number === 9);
-
+      setIsRamadan(hijri.month === 9);
+    
       // Hijri display
-      setHijriDate(`${hijri.day} ${hijri.month.en} ${hijri.year}`);
+      setHijriDate(`${hijri.day} ${hijri.monthName} ${hijri.year}`);
 
       // -------------------------
       // 7. Notifications (optional)

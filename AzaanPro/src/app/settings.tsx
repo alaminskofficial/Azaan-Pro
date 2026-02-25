@@ -10,6 +10,8 @@ export default function Settings() {
   const madhab = useAppStore((s) => s.madhab);
   const setMethod = useAppStore((s) => s.setMethod);
   const setMadhab = useAppStore((s) => s.setMadhab);
+  const hijriOffset = useAppStore((s) => s.hijriOffset);
+  const setHijriOffset = useAppStore((s) => s.setHijriOffset);
 
   const METHODS = METHOD_IDS.map((id) => ({
     id,
@@ -69,6 +71,40 @@ export default function Settings() {
           </Picker>
         </View>
       </View>
+      {/* Hijri Adjustment */}
+      <View style={styles.card}>
+        <Text style={styles.label}>Hijri Date Adjustment :</Text>
+
+        <View style={styles.pickerWrapper}>
+          <Picker
+            selectedValue={hijriOffset}
+            dropdownIconColor={colors.primary}
+            onValueChange={(value) => setHijriOffset(value)}
+            style={[styles.picker, { color: colors.textPrimary }]}
+            itemStyle={{ color: colors.textPrimary }}
+          >
+            <Picker.Item
+              label="-2 days"
+              value={-2}
+              color={colors.textPrimary}
+            />
+            <Picker.Item
+              label="-1 day (Recommended for India)"
+              value={-1}
+              color={colors.textPrimary}
+            />
+            <Picker.Item
+              label="No adjustment"
+              value={0}
+              color={colors.textPrimary}
+            />
+            <Picker.Item label="+1 day" value={1} color={colors.textPrimary} />
+            <Picker.Item label="+2 days" value={2} color={colors.success} />
+          </Picker>
+        </View>
+
+        <Text style={styles.helper}>Adjust if local moon sighting differs</Text>
+      </View>
     </View>
   );
 }
@@ -83,6 +119,7 @@ const styles = StyleSheet.create({
     fontSize: 22,
     fontWeight: "600",
     color: colors.textPrimary,
+    marginTop: 25,
     marginBottom: 25,
   },
 
@@ -111,5 +148,10 @@ const styles = StyleSheet.create({
 
   picker: {
     color: colors.success,
+  },
+  helper: {
+    fontSize: 12,
+    color: colors.textMuted,
+    marginTop: 6,
   },
 });

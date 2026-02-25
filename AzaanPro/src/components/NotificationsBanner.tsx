@@ -28,7 +28,7 @@ export default function NotificationBanner() {
       onPress={requestPermission}
       style={[
         tailwind`mx-4 mt-3 p-4 rounded-xl`,
-        { backgroundColor: colors.warning },
+        { backgroundColor: colors.notificationBg },
       ]}
     >
       <Text style={tailwind`text-white font-semibold`}>
