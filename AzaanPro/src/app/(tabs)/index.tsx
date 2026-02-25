@@ -34,7 +34,7 @@ import {
       return (
         <View style={styles.center}>
           <ActivityIndicator size="large" color={colors.primary} />
-          <Text style={{ color: "#fff" }}>Loading prayer times...</Text>
+          <Text style={{ color: colors.textPrimary }}>Loading prayer times...</Text>
         </View>
       );
     }
@@ -42,7 +42,7 @@ import {
     if (!prayers) {
       return (
         <View style={styles.center}>
-          <Text style={{ color: "#fff" }}>No data available</Text>
+          <Text style={{ color: colors.textPrimary }}>No data available</Text>
         </View>
       );
     }

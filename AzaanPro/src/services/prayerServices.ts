@@ -9,11 +9,13 @@ export const fetchMonthlyPrayerTimes = async (
   const year = today.getFullYear();
 
   const schoolParam = school === 1 ? `&school=1` : "";
+  
 
   const url = `https://api.aladhan.com/v1/calendar?latitude=${lat}&longitude=${lng}&method=${method}${schoolParam}&month=${month}&year=${year}`;
 
   const res = await fetch(url);
   const json = await res.json();
+  console.log("Fetched monthly prayer times:", json.data);
 
   return json.data;
 };

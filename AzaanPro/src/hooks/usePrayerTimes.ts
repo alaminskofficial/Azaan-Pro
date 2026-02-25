@@ -120,8 +120,7 @@ export const usePrayerTimes = () => {
       const todayTimings = todayData.timings;
       const hijriRaw = todayData.date.hijri;
       const offset = useAppStore.getState().hijriOffset;
-      console.log("Hijri raw:", hijriRaw, "Offset:", offset);
-
+      
       // India adjustment
       const hijri = applyHijriOffset(hijriRaw, offset);
 

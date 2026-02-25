@@ -30,24 +30,23 @@ export default function PrayerTimesScreen() {
   //monthlyPrayerTimes is already array , 7 days data i will take for shoiw in flatlist
   const days = useMemo(() => {
     if (!monthlyPrayerTimes || !monthlyPrayerTimes.length) return [];
-  
+
     const todayReadable = new Date().toLocaleDateString("en-GB", {
       day: "2-digit",
       month: "short",
       year: "numeric",
     });
-  
+
     const startIndex = monthlyPrayerTimes.findIndex(
       (d: any) => d.date?.readable === todayReadable
     );
-  
+
     const index = startIndex >= 0 ? startIndex : 0;
-  
+
     // Today + next 6 days
     return monthlyPrayerTimes.slice(index, index + 7);
   }, [monthlyPrayerTimes]);
 
-  
   const todayIndex = 0; // Since we already slice from today, the first item is always today
 
   useEffect(() => {
@@ -78,25 +77,41 @@ export default function PrayerTimesScreen() {
 
   const renderItem = ({ item }: any) => {
     const t = item.timings;
-
     const formattedDate = item.date?.readable;
-
-    //const currentPrayer = getCurrentPrayer(t);
-
     return (
       <View style={styles.page}>
         <Text style={styles.date}>{formattedDate}</Text>
         <PrayerRow name="Sehri Ends (Imsak)" time={cleanTime(t?.Imsak)} />
-        <PrayerRow name="Fajr" time={cleanTime(t?.Fajr)} active={currentPrayer === "Fajr"} />
-        <PrayerRow name="Sunrise" time={cleanTime(t?.Sunrise)} active={currentPrayer === "Sunrise"} />
-        <PrayerRow name="Dhuhr" time={cleanTime(t?.Dhuhr)} active={currentPrayer === "Dhuhr"} />
-        <PrayerRow name="Asr" time={cleanTime(t?.Asr)} active={currentPrayer === "Asr"} />
+        <PrayerRow
+          name="Fajr"
+          time={cleanTime(t?.Fajr)}
+          active={currentPrayer === "Fajr"}
+        />
+        <PrayerRow
+          name="Sunrise"
+          time={cleanTime(t?.Sunrise)}
+          active={currentPrayer === "Sunrise"}
+        />
+        <PrayerRow
+          name="Dhuhr"
+          time={cleanTime(t?.Dhuhr)}
+          active={currentPrayer === "Dhuhr"}
+        />
+        <PrayerRow
+          name="Asr"
+          time={cleanTime(t?.Asr)}
+          active={currentPrayer === "Asr"}
+        />
         <PrayerRow
           name="Maghrib / Iftar"
           time={cleanTime(t?.Maghrib)}
           active={currentPrayer === "Maghrib"}
         />
-        <PrayerRow name="Isha" time={cleanTime(t?.Isha)} active={currentPrayer === "Isha"} />
+        <PrayerRow
+          name="Isha"
+          time={cleanTime(t?.Isha)}
+          active={currentPrayer === "Isha"}
+        />
         <PrayerRow name="Qiyam (Last Third)" time={cleanTime(t?.Lastthird)} />
       </View>
     );
@@ -108,7 +123,7 @@ export default function PrayerTimesScreen() {
       <View style={styles.listContainer}>
         <FlatList
           ref={flatListRef}
-          data={days} 
+          data={days}
           renderItem={renderItem}
           keyExtractor={(item) => item.date.timestamp}
           horizontal
@@ -121,39 +136,34 @@ export default function PrayerTimesScreen() {
             index,
           })}
         />
-  
+
         {/* Dot Indicator */}
         <View style={styles.dotsContainer}>
           {days.map((_: any, i: any) => (
             <View
               key={i}
-              style={[
-                styles.dot,
-                i === activeIndex && styles.activeDot,
-              ]}
+              style={[styles.dot, i === activeIndex && styles.activeDot]}
             />
           ))}
         </View>
       </View>
-  
+
       {/* 20% Bottom Info */}
       {/* later i have to add functionality like if madhab and method chnages ,
        re fetch data from server and update the storage ,similar this func already in settings */}
       <View style={styles.bottomPanel}>
         <Text style={styles.bottomTitle}>Calculation Settings</Text>
-  
+
         <View style={styles.bottomRow}>
           <Text style={styles.bottomLabel}>Juristic Method (Madhab):</Text>
           <Text style={styles.bottomValue}>
             {madhab === "hanafi" ? "Hanafi" : "Shafi/Maliki/Hanbali"}
           </Text>
         </View>
-  
+
         <View style={styles.bottomRow}>
           <Text style={styles.bottomLabel}> Calculation Method:</Text>
-          <Text style={styles.bottomValue}>
-            {getMethodName(method)}
-          </Text>
+          <Text style={styles.bottomValue}>{getMethodName(method)}</Text>
         </View>
       </View>
     </View>
@@ -161,8 +171,6 @@ export default function PrayerTimesScreen() {
 }
 
 /* ---------- Components ---------- */
-
-
 
 /* ---------- Styles ---------- */
 
@@ -240,11 +248,11 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: colors.background,
   },
-  
+
   listContainer: {
     flex: 0.8, // 80%
   },
-  
+
   bottomPanel: {
     flex: 0.2, // 20%
     backgroundColor: colors.surface,
@@ -254,7 +262,7 @@ const styles = StyleSheet.create({
     borderTopWidth: 1,
     borderColor: colors.border,
   },
-  
+
   bottomTitle: {
     fontSize: 14,
     fontWeight: "600",
@@ -262,18 +270,18 @@ const styles = StyleSheet.create({
     marginBottom: 10,
     textAlign: "center",
   },
-  
+
   bottomRow: {
     flexDirection: "row",
     justifyContent: "space-between",
     marginBottom: 20,
   },
-  
+
   bottomLabel: {
     color: colors.textSecondary,
     fontSize: 14,
   },
-  
+
   bottomValue: {
     color: colors.textPrimary,
     fontSize: 14,
