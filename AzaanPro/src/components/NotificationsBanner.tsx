@@ -45,8 +45,8 @@ export default function NotificationBanner() {
 
       <Text style={tailwind`text-white text-xs mt-1`}>
         {status === "denied"
-          ? "Tap to open settings and enable Athan"
-          : "Tap to enable Athan alerts"}
+          ? "Tap to open settings and enable notifications"
+          : "Tap to enable prayer alerts"}
       </Text>
     </TouchableOpacity>
   );
