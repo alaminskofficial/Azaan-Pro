@@ -10,27 +10,7 @@ import {
 import * as Location from "expo-location";
 import { Magnetometer } from "expo-sensors";
 import { colors } from "@/theme/color";
-
-const KAABA_LAT = 21.4225;
-const KAABA_LNG = 39.8262;
-
-/* ---------------- Qibla Calculation ---------------- */
-const getQiblaDirection = (userLat: number, userLng: number) => {
-  const toRad = (deg: number) => (deg * Math.PI) / 180;
-  const toDeg = (rad: number) => (rad * 180) / Math.PI;
-
-  const dLng = toRad(KAABA_LNG - userLng);
-
-  const y = Math.sin(dLng) * Math.cos(toRad(KAABA_LAT));
-  const x =
-    Math.cos(toRad(userLat)) * Math.sin(toRad(KAABA_LAT)) -
-    Math.sin(toRad(userLat)) *
-      Math.cos(toRad(KAABA_LAT)) *
-      Math.cos(dLng);
-
-  const bearing = toDeg(Math.atan2(y, x));
-  return (bearing + 360) % 360;
-};
+import { getAngleDifference , getQiblaDirection} from "@/utils/qibla";
 
 export default function QiblaCompassScreen() {
   const [heading, setHeading] = useState(0);
@@ -45,8 +25,7 @@ export default function QiblaCompassScreen() {
   const useCurrentLocation = async () => {
     setLoading(true);
 
-    const { status } =
-      await Location.requestForegroundPermissionsAsync();
+    const { status } = await Location.requestForegroundPermissionsAsync();
     if (status !== "granted") {
       setLoading(false);
       return;
@@ -73,9 +52,7 @@ export default function QiblaCompassScreen() {
       if (angle < 0) angle += 360;
 
       // Smooth transition
-      const smooth =
-        lastAngle.current +
-        (angle - lastAngle.current) * 0.15;
+      const smooth = lastAngle.current + (angle - lastAngle.current) * 0.15;
       lastAngle.current = smooth;
 
       setHeading(smooth);
@@ -114,9 +91,10 @@ export default function QiblaCompassScreen() {
     outputRange: ["-180deg", "180deg"],
   });
 
+  const TOLERANCE = 5; // degrees
+
   const isFacing =
-    qibla !== null &&
-    Math.abs(((heading - qibla + 540) % 360) - 180) < 5;
+    qibla !== null && getAngleDifference(heading, qibla) <= TOLERANCE;
 
   return (
     <View style={styles.container}>
@@ -130,18 +108,14 @@ export default function QiblaCompassScreen() {
         />
       ) : (
         <>
-          <Text style={styles.info}>
-            Heading: {Math.round(heading)}°
-          </Text>
+          <Text style={styles.info}>Heading: {Math.round(heading)}°</Text>
 
           <Text style={styles.info}>
             Qibla: {qibla !== null ? Math.round(qibla) : "--"}°
           </Text>
 
           {isFacing && (
-            <Text style={styles.facing}>
-              ✔ You are facing Qibla
-            </Text>
+            <Text style={styles.facing}>✔ You are facing Qibla</Text>
           )}
 
           {/* Compass */}
@@ -165,9 +139,7 @@ export default function QiblaCompassScreen() {
                 style={[
                   styles.needleContainer,
                   {
-                    transform: [
-                      { rotate: needleRotateInterpolate },
-                    ],
+                    transform: [{ rotate: needleRotateInterpolate }],
                   },
                 ]}
               >
@@ -176,13 +148,8 @@ export default function QiblaCompassScreen() {
             )}
           </View>
 
-          <TouchableOpacity
-            style={styles.button}
-            onPress={useCurrentLocation}
-          >
-            <Text style={styles.buttonText}>
-              Refresh Location
-            </Text>
+          <TouchableOpacity style={styles.button} onPress={useCurrentLocation}>
+            <Text style={styles.buttonText}>Refresh Location</Text>
           </TouchableOpacity>
         </>
       )}

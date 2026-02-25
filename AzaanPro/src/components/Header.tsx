@@ -14,14 +14,19 @@ export default function Header() {
       style={tailwind`px-4 pt-4 pb-3 flex-row justify-between items-center`}
     >
       <Text style={styles.logo}>Azaan Pro</Text>
-      <View>
-        <Text
-          style={[tailwind`text-lg font-bold`, { color: colors.textSecondary }]}
-        >
-          {city}
-        </Text>
-        <Text style={{ color: colors.textSecondary }}>{hijriDate}</Text>
-      </View>
+      <TouchableOpacity onPress={() => router.push("/settings")}>
+        <View>
+          <Text
+            style={[
+              tailwind`text-lg font-bold`,
+              { color: colors.textSecondary },
+            ]}
+          >
+            {city}
+          </Text>
+          <Text style={{ color: colors.textSecondary }}>{hijriDate}</Text>
+        </View>
+      </TouchableOpacity>
 
       <View style={tailwind`flex-row gap-3`}>
         {/* <View style={tailwind`w-8 h-8 bg-purple-500 rounded-full`} /> */}

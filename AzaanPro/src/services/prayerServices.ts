@@ -15,7 +15,7 @@ export const fetchMonthlyPrayerTimes = async (
 
   const res = await fetch(url);
   const json = await res.json();
-  console.log("Fetched monthly prayer times:", json.data);
+  //console.log("Fetched monthly prayer times:", json.data);
 
   return json.data;
 };
