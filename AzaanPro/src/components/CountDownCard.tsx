@@ -35,7 +35,7 @@ export default function CountDownCard({
   const goToPrayers = () => {
     router.push("/(tabs)/prayerTimes"); 
   };
-
+ 
   return (
     <View style={styles.card}>
       <View style={styles.left}>

@@ -29,10 +29,10 @@ export default function QiblaCompassScreen() {
   const useCurrentLocation = async () => {
     setLoading(true);
     try {
-      console.log("Fetching location...");
+      //console.log("Fetching location...");
       alert("Fetching location... Please ensure location services are enabled and you have a good GPS signal.");
       const loc = await getUserLocation();
-      console.log("Location obtained:", loc);
+      //console.log("Location obtained:", loc);
      
 
       if (!loc) {

@@ -1,58 +1,40 @@
-import * as Notifications from "expo-notifications";
-import AsyncStorage from "@react-native-async-storage/async-storage";
 
+import * as Notifications from "expo-notifications";
+
+/* ---------------- Permission ---------------- */
 export const requestNotificationPermission = async () => {
-  const { status } = await Notifications.requestPermissionsAsync();
-  return status === "granted";
+  const { status } = await Notifications.getPermissionsAsync();
+
+  if (status === "granted") return true;
+
+  const res = await Notifications.requestPermissionsAsync();
+  return res.status === "granted";
 };
 
-// export const schedulePrayerNotifications = async (timings: any) => {
-//   const prayers = ["Fajr", "Dhuhr", "Asr", "Maghrib", "Isha"];
-  
-//   await Notifications.cancelAllScheduledNotificationsAsync();
-
-//   for (let name of prayers) {
-//     const [hour, minute] = timings[name].split(":");
-
-//     await Notifications.scheduleNotificationAsync({
-//       content: {
-//         title: `${name} Prayer`,
-//         body: `Time for ${name}`,
-//         sound: true,
-//       },
-//       trigger: {
-//         type: Notifications.SchedulableTriggerInputTypes.DAILY,
-//         hour: parseInt(hour),
-//         minute: parseInt(minute)
-//       },
-//     });
-//   }
-// };
-
+/* ---------------- Schedule Daily Prayers ---------------- */
 export const schedulePrayerNotifications = async (timings: any) => {
   const prayers = ["Fajr", "Dhuhr", "Asr", "Maghrib", "Isha"];
 
-  const todayKey = `scheduled_${new Date().toDateString()}`;
-  const already = await AsyncStorage.getItem(todayKey);
-  if (already) return;
+  for (const name of prayers) {
+    if (!timings?.[name]) continue;
 
-  for (let name of prayers) {
-    const [hour, minute] = timings[name].split(":");
+    // timings come like "05:12 (IST)"
+    const time = timings[name].split(" ")[0];
+    const [hour, minute] = time.split(":").map(Number);
 
     await Notifications.scheduleNotificationAsync({
       content: {
         title: `${name} Prayer`,
         body: `Time for ${name}`,
-        sound: true,
+        sound: "default",
+        priority: Notifications.AndroidNotificationPriority.HIGH,
       },
       trigger: {
         type: Notifications.SchedulableTriggerInputTypes.CALENDAR,
-        hour: Number(hour),
-        minute: Number(minute),
-        repeats: true,
+        hour,
+        minute,
+        repeats: false, 
       },
     });
   }
-
-  await AsyncStorage.setItem(todayKey, "true");
 };

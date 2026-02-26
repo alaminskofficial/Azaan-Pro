@@ -16,7 +16,8 @@ import {
   import NotificationBanner from "@/components/NotificationsBanner";
   import { colors } from "@/theme/color";
   import RamadanBanner from "@/components/RamadanBanner";
-  import { useEffect } from "react";
+  import { useScheduleDailyNotifications } from "@/hooks/useDailyNotifications";
+ 
   
   const stories = [
     { id: "1", img: "https://picsum.photos/200/300" },
@@ -29,10 +30,9 @@ import {
     const { loading } = usePrayerTimes();
     const prayers = useAppStore((s) => s.prayerTimes);
     const isRamadan = useAppStore((s) => s.isRamadan);
-    const prayerInfo = prayers ? getCurrentAndNextPrayer(prayers) : null;
-        useEffect(() => {
-      // just make sure to update CountdownCard if prayerInfo changes due to new data or time change
-    }, [prayerInfo?.current]);
+    const prayerInfo = prayers ? getCurrentAndNextPrayer(prayers) : null; 
+    //notification hook to schedule daily notifications based on prayer times, it will reschedule every time prayer times change (like after midnight or if user changes location/settings)
+    useScheduleDailyNotifications(prayers);   
     
     if (loading) {
       return (
@@ -50,6 +50,8 @@ import {
         </View>
       );
     }
+   
+
   
     return (
       <View style={styles.container}>
@@ -59,6 +61,7 @@ import {
           {/* Countdown Card */}
           {prayerInfo && (
             <CountdownCard
+              key={`${prayerInfo.current}-${prayerInfo.next}`}
               current={prayerInfo.current}
               currentTime={prayerInfo.currentTime}
               next={prayerInfo.next}
