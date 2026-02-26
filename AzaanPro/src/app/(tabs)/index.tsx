@@ -16,6 +16,7 @@ import {
   import NotificationBanner from "@/components/NotificationsBanner";
   import { colors } from "@/theme/color";
   import RamadanBanner from "@/components/RamadanBanner";
+  import { useEffect } from "react";
   
   const stories = [
     { id: "1", img: "https://picsum.photos/200/300" },
@@ -29,6 +30,9 @@ import {
     const prayers = useAppStore((s) => s.prayerTimes);
     const isRamadan = useAppStore((s) => s.isRamadan);
     const prayerInfo = prayers ? getCurrentAndNextPrayer(prayers) : null;
+        useEffect(() => {
+      // just make sure to update CountdownCard if prayerInfo changes due to new data or time change
+    }, [prayerInfo?.current]);
     
     if (loading) {
       return (

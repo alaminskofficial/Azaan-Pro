@@ -10,9 +10,12 @@ import {
 import * as Location from "expo-location";
 import { Magnetometer } from "expo-sensors";
 import { colors } from "@/theme/color";
-import { getAngleDifference , getQiblaDirection} from "@/utils/qibla";
+import { getAngleDifference, getQiblaDirection } from "@/utils/qibla";
+import { useAppStore } from "@/store/appStore";
+import { getUserLocation } from "@/services/locationServices";
 
 export default function QiblaCompassScreen() {
+  const glowAnim = useRef(new Animated.Value(0)).current;
   const [heading, setHeading] = useState(0);
   const [qibla, setQibla] = useState<number | null>(null);
   const [loading, setLoading] = useState(true);
@@ -20,30 +23,51 @@ export default function QiblaCompassScreen() {
   const needleRotate = useRef(new Animated.Value(0)).current;
   const dialRotate = useRef(new Animated.Value(0)).current;
   const lastAngle = useRef(0);
+  const savedLocation = useAppStore((s) => s.location); // { latitude: number, longitude: number }
 
   /* ---------------- Location ---------------- */
   const useCurrentLocation = async () => {
     setLoading(true);
+    try {
+      console.log("Fetching location...");
+      alert("Fetching location... Please ensure location services are enabled and you have a good GPS signal.");
+      const loc = await getUserLocation();
+      console.log("Location obtained:", loc);
+     
 
-    const { status } = await Location.requestForegroundPermissionsAsync();
-    if (status !== "granted") {
-      setLoading(false);
-      return;
+      if (!loc) {
+        setLoading(false);
+        return;
+      }
+
+      const direction = getQiblaDirection(loc.latitude, loc.longitude);
+
+      setQibla(direction);
+    } catch (error) {
+      console.log("Error getting location:", error);
+      alert(
+        "Unable to get location. Please enable location services and try again in an area with good GPS and network signal."
+      );
     }
-
-    const loc = await Location.getCurrentPositionAsync({});
-    const direction = getQiblaDirection(
-      loc.coords.latitude,
-      loc.coords.longitude
-    );
-
-    setQibla(direction);
     setLoading(false);
   };
-
+  
   useEffect(() => {
-    useCurrentLocation();
+    initFromStorage();
   }, []);
+
+  const initFromStorage = async () => {
+    const saved = savedLocation;
+    console.log("Saved location from store:", saved);
+    if (saved) {
+      const direction = getQiblaDirection(saved.latitude, saved.longitude);
+      setQibla(direction);
+      setLoading(false);
+    } else {
+      // fallback only if no saved location
+      await useCurrentLocation();
+    }
+  };
 
   /* ---------------- Magnetometer ---------------- */
   useEffect(() => {
@@ -96,11 +120,64 @@ export default function QiblaCompassScreen() {
   const isFacing =
     qibla !== null && getAngleDifference(heading, qibla) <= TOLERANCE;
 
+  useEffect(() => {
+    if (isFacing) {
+      Animated.loop(
+        Animated.sequence([
+          Animated.timing(glowAnim, {
+            toValue: 1,
+            duration: 900,
+            useNativeDriver: false,
+          }),
+          Animated.timing(glowAnim, {
+            toValue: 0,
+            duration: 900,
+            useNativeDriver: false,
+          }),
+        ])
+      ).start();
+    } else {
+      glowAnim.stopAnimation();
+      glowAnim.setValue(0);
+    }
+  }, [isFacing]);
+
+  const glowOpacity = glowAnim.interpolate({
+    inputRange: [0, 1],
+    outputRange: [0.4, 0.9],
+  });
+
+  const glowScale = glowAnim.interpolate({
+    inputRange: [0, 1],
+    outputRange: [1, 1.15],
+  });
+  const renderTicks = () => {
+    const ticks = [];
+    for (let i = 0; i < 360; i += 10) {
+      const isMajor = i % 30 === 0;
+      ticks.push(
+        <View
+          key={i}
+          style={[
+            styles.tick,
+            {
+              height: isMajor ? 14 : 8,
+              transform: [{ rotate: `${i}deg` }],
+            },
+          ]}
+        >
+          {isMajor && <Text style={styles.degreeLabel}>{i}°</Text>}
+        </View>
+      );
+    }
+    return ticks;
+  };
+
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Qibla Direction</Text>
 
-      {loading ? (
+      {loading && qibla === null ? (
         <ActivityIndicator
           size="large"
           color={colors.primary}
@@ -114,9 +191,16 @@ export default function QiblaCompassScreen() {
             Qibla: {qibla !== null ? Math.round(qibla) : "--"}°
           </Text>
 
-          {isFacing && (
-            <Text style={styles.facing}>✔ You are facing Qibla</Text>
-          )}
+          <Text
+            style={[
+              styles.facing,
+              { color: isFacing ? colors.success : colors.textSecondary },
+            ]}
+          >
+            {isFacing
+              ? "✔ You are Facing Qibla 🕋 "
+              : "Rotate phone to align with Kaaba"}
+          </Text>
 
           {/* Compass */}
           <View style={styles.wrapper}>
@@ -133,17 +217,50 @@ export default function QiblaCompassScreen() {
               <Text style={[styles.label, { right: 15 }]}>E</Text>
             </Animated.View>
 
+            {/* Compass Ring */}
+            {/* <Animated.View
+                style={[
+                  styles.dial,
+                  { transform: [{ rotate: dialRotateInterpolate }] },
+                ]}
+              >
+                {renderTicks()}
+
+                
+                <Text style={[styles.cardinal, { top: 8 }]}>N</Text>
+                <Text style={[styles.cardinal, { bottom: 8 }]}>S</Text>
+                <Text style={[styles.cardinal, { left: 8 }]}>W</Text>
+                <Text style={[styles.cardinal, { right: 8 }]}>E</Text>
+              </Animated.View> */}
+
             {/* Needle */}
+            {/* Arrow Needle */}
             {qibla !== null && (
               <Animated.View
                 style={[
                   styles.needleContainer,
+                  { transform: [{ rotate: needleRotateInterpolate }] },
+                ]}
+              >
+                {/* Arrow Head */}
+                <View style={styles.arrowHead} />
+
+                {/* Arrow Shaft */}
+                <View style={styles.arrowShaft} />
+              </Animated.View>
+            )}
+            {/* Kaaba Glow */}
+            {qibla !== null && (
+              <Animated.View
+                style={[
+                  styles.kaabaGlow,
                   {
-                    transform: [{ rotate: needleRotateInterpolate }],
+                    opacity: glowOpacity,
+                    transform: [{ scale: glowScale }],
                   },
                 ]}
               >
-                <View style={styles.needle} />
+                <Text style={styles.kaabaIcon}>🕋</Text>
               </Animated.View>
             )}
           </View>
@@ -215,6 +332,7 @@ const styles = StyleSheet.create({
   needleContainer: {
     position: "absolute",
     alignItems: "center",
+    justifyContent: "flex-start",
   },
 
   needle: {
@@ -234,5 +352,77 @@ const styles = StyleSheet.create({
   buttonText: {
     color: colors.textPrimary,
     fontWeight: "600",
+  },
+  kaabaGlow: {
+    position: "absolute",
+    width: 70,
+    height: 70,
+    borderRadius: 35,
+    backgroundColor: "rgba(34, 197, 94, 0.25)", // soft green glow
+    justifyContent: "center",
+    alignItems: "center",
+  },
+
+  kaabaIcon: {
+    fontSize: 34,
+    color: colors.success,
+  },
+
+  needleShaft: {
+    width: 4,
+    height: 110,
+    backgroundColor: colors.error,
+    borderRadius: 2,
+  },
+
+  kaabaTip: {
+    marginTop: -6,
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    backgroundColor: colors.background,
+    justifyContent: "center",
+    alignItems: "center",
+    shadowColor: "#000",
+    shadowOpacity: 0.3,
+    shadowRadius: 4,
+    elevation: 6,
+  },
+  tick: {
+    position: "absolute",
+    width: 2,
+    backgroundColor: colors.textPrimary,
+    top: 4,
+  },
+  degreeLabel: {
+    position: "absolute",
+    top: 18,
+    fontSize: 10,
+    color: colors.textSecondary,
+    transform: [{ rotate: "180deg" }],
+  },
+
+  cardinal: {
+    position: "absolute",
+    fontSize: 18,
+    fontWeight: "700",
+    color: colors.primary,
+  },
+  arrowHead: {
+    width: 0,
+    height: 0,
+    borderLeftWidth: 8,
+    borderRightWidth: 8,
+    borderBottomWidth: 14,
+    borderLeftColor: "transparent",
+    borderRightColor: "transparent",
+    borderBottomColor: colors.error, // arrow color
+  },
+
+  arrowShaft: {
+    width: 4,
+    height: 115,
+    backgroundColor: colors.error,
+    borderRadius: 2,
   },
 });

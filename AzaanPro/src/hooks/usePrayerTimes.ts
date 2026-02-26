@@ -25,20 +25,10 @@ export const usePrayerTimes = () => {
       const year = today.getFullYear();
   
       const lastLocationStr = await AsyncStorage.getItem("last_location");
-      if (!lastLocationStr) {
-        setLoading(false);
-        return;
-      }
-  
-      const loc = JSON.parse(lastLocationStr);
-  
-      setCity(loc.city);
-      setLocation({
-        latitude: loc.latitude,
-        longitude: loc.longitude,
-      });
-  
-      const cacheKey = `prayer_${loc.latitude}_${loc.longitude}_${month}_${year}_${method}_${school}`;
+      console.log("Last location from storage:", lastLocationStr);
+      const loc = lastLocationStr ? JSON.parse(lastLocationStr) : null;
+
+      const cacheKey = `prayer_${loc?.latitude}_${loc?.longitude}_${month}_${year}_${method}_${school}`;
       const cached = await AsyncStorage.getItem(cacheKey);
   
       // PHASE 1 — Show Cached Immediately

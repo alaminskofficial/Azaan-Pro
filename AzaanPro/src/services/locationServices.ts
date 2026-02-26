@@ -5,7 +5,7 @@ export const getUserLocation = async () => {
   if (status !== "granted") return null;
 
   const position = await Location.getCurrentPositionAsync({
-    accuracy: Location.Accuracy.High,
+    accuracy: Location.Accuracy.Balanced, //now using balanced to save battery, can switch to high if needed
   });
 
   const reverse = await Location.reverseGeocodeAsync(position.coords);
