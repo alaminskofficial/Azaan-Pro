@@ -23,9 +23,20 @@ export const getQiblaDirection = (
   return (bearing + 360) % 360;
 };
 
-
-
 export const getAngleDifference = (a: number, b: number) => {
   let diff = Math.abs(a - b);
   return diff > 180 ? 360 - diff : diff;
+};
+
+export const getCompassLabel = (angle: number) => {
+  const dirs = ["N", "NE", "E", "SE", "S", "SW", "W", "NW"];
+  const index = Math.round(angle / 45) % 8;
+  return `${dirs[index]} ${Math.round(angle)}°`;
+};
+
+export const getDeltaText = (delta: number) => {
+  if (Math.abs(delta) < 1) return "Aligned";
+  return delta > 0
+    ? `↺ ${Math.abs(Math.round(delta))}° left`
+    : `↻ ${Math.abs(Math.round(delta))}° right`;
 };
