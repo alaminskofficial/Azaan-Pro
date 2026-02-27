@@ -1,8 +1,8 @@
 export function getCurrentAndNextPrayer(timings: any) {
   const now = new Date();
-
+  //console.log("Calculating current/next prayer for timings:", timings);
   // Dynamic prayer order (can be reused anywhere)
-  const prayerOrder = ["Fajr","Sunrise", "Dhuhr", "Asr", "Maghrib", "Isha"];
+  const prayerOrder = ["Imsak","Fajr","Sunrise", "Dhuhr", "Asr", "Maghrib", "Isha" ,"Midnight" ,"Lastthird"];
   
   // Convert to array of objects
   const todayTimes = prayerOrder.map((name) => {
@@ -16,7 +16,7 @@ export function getCurrentAndNextPrayer(timings: any) {
 
     return { name, time };
   });
-
+ //console.log("Parsed today's prayer times:", todayTimes);
   // Find next prayer
   let nextPrayer = null;
   let currentPrayer = null;

@@ -21,6 +21,8 @@ export default function PrayerTimesScreen() {
   const monthlyPrayerTimes = useAppStore((s) => s.monthlyPrayerTimes);
   const prayers = useAppStore((s) => s.prayerTimes);
   const prayerInfo = prayers ? getCurrentAndNextPrayer(prayers) : null;
+  //console.log("Prayer info:", prayerInfo);
+  //console.log("Monthly prayer times:", monthlyPrayerTimes);
   const currentPrayer = prayerInfo?.current || null;
   const flatListRef = useRef<FlatList>(null);
   const [activeIndex, setActiveIndex] = useState(0);
@@ -81,7 +83,7 @@ export default function PrayerTimesScreen() {
     return (
       <View style={styles.page}>
         <Text style={styles.date}>{formattedDate}</Text>
-        <PrayerRow name="Sehri Ends (Imsak)" time={cleanTime(t?.Imsak)} />
+        <PrayerRow name="Sehri Ends (Imsak)" time={cleanTime(t?.Imsak)} active={currentPrayer === "Imsak"} />
         <PrayerRow
           name="Fajr"
           time={cleanTime(t?.Fajr)}
@@ -112,7 +114,12 @@ export default function PrayerTimesScreen() {
           time={cleanTime(t?.Isha)}
           active={currentPrayer === "Isha"}
         />
-        <PrayerRow name="Qiyam (Last Third)" time={cleanTime(t?.Lastthird)} />
+        <PrayerRow
+          name="Midnight"
+          time={cleanTime(t?.Midnight)}
+          active={currentPrayer === "Midnight"}
+        />
+        <PrayerRow name="Qiyam (Last Third)" time={cleanTime(t?.Lastthird)}  active={currentPrayer === "Lastthird"}/>
       </View>
     );
   };

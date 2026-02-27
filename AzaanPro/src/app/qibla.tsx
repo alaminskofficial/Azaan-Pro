@@ -28,7 +28,8 @@ export default function QiblaCompassScreen() {
   const needleRotate = useRef(new Animated.Value(0)).current;
   const dialRotate = useRef(new Animated.Value(0)).current;
   const lastAngle = useRef(0);
-  const savedLocation = useAppStore((s) => s.location); // { latitude: number, longitude: number }
+  const savedLocation = useAppStore((s) => s.location);
+  const [usedLocation, setUsedLocation] = useState<any | null>(null); 
   const [interference, setInterference] = useState(false);
   const lastHaptic = useRef(false);
 
@@ -40,6 +41,7 @@ export default function QiblaCompassScreen() {
         "Fetching location... Please ensure location services are enabled and you have a good GPS signal."
       );
       const loc = await getUserLocation();
+      setUsedLocation(loc); 
 
       if (!loc) {
         setLoading(false);
@@ -66,6 +68,7 @@ export default function QiblaCompassScreen() {
     const saved = savedLocation;
     if (saved) {
       const direction = getQiblaDirection(saved.latitude, saved.longitude);
+      setUsedLocation(savedLocation);
       setQibla(direction);
       setLoading(false);
     } else {
@@ -199,6 +202,19 @@ export default function QiblaCompassScreen() {
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Qibla Direction</Text>
+      {/* Location Info */}
+      {usedLocation && (
+        <View style={styles.locationBox}>
+          <Text style={styles.locationCity}>
+            📍 {usedLocation.city ?? "Current Location"}
+          </Text>
+
+          <Text style={styles.locationCoords}>
+            Lat {usedLocation.latitude.toFixed(4)} • Lon{" "}
+            {usedLocation.longitude.toFixed(4)}
+          </Text>
+        </View>
+      )}
 
       {loading && qibla === null ? (
         <ActivityIndicator
@@ -535,5 +551,27 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     fontWeight: "600",
   },
-  
+  locationBox: {
+    marginTop: 6,
+    marginBottom: 10,
+    alignItems: "center",
+    paddingHorizontal: 14,
+    paddingVertical: 8,
+    borderRadius: 14,
+    backgroundColor: colors.surface,
+    borderWidth: 1,
+    borderColor: colors.border,
+  },
+
+  locationCity: {
+    fontSize: 15,
+    fontWeight: "600",
+    color: colors.textPrimary,
+  },
+
+  locationCoords: {
+    marginTop: 2,
+    fontSize: 13,
+    color: colors.textSecondary,
+  },
 });

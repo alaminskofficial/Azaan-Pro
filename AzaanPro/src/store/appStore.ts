@@ -2,7 +2,7 @@ import { create } from "zustand";
 
 interface AppState {
   city: string;
-  location: { latitude: number; longitude: number } | null;
+  location: { latitude: number; longitude: number ; city?: string } | null;
   prayerTimes: any;
   monthlyPrayerTimes: any;
   method: number;

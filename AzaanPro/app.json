@@ -1,9 +1,9 @@
 {
   "expo": {
-    "name": "AzaanPro",
-    "slug": "AzaanPro",
+    "name": "Azaan Pro",
+    "slug": "Azaan Pro",
     "scheme": "prayer-times",
-    "version": "1.0.4",
+    "version": "1.0.5",
     "orientation": "portrait",
     "icon": "./assets/azaanpro.png",
     "userInterfaceStyle": "light",
@@ -17,7 +17,7 @@
       "supportsTablet": true
     },
     "android": {
-      "versionCode": 4,
+      "versionCode": 5,
       "adaptiveIcon": {
         "foregroundImage": "./assets/azaanpro.png",
         "backgroundColor": "#ffffff"

@@ -3,6 +3,7 @@ import { useAppStore } from "../store/appStore";
 import tailwind from "twrnc";
 import { colors } from "@/theme/color";
 import { useRouter } from "expo-router";
+import { AntDesign } from "@expo/vector-icons";
 
 export default function Header() {
   const city = useAppStore((s) => s.city);
@@ -29,9 +30,27 @@ export default function Header() {
       </TouchableOpacity>
 
       <View style={tailwind`flex-row gap-3`}>
-        {/* <View style={tailwind`w-8 h-8 bg-purple-500 rounded-full`} /> */}
         <TouchableOpacity onPress={() => router.push("/profile")}>
-          <View style={tailwind`w-8 h-8 bg-gray-600 rounded-full`} />
+          <View
+            style={tailwind`w-8 h-8 bg-gray-600 rounded-full items-center justify-center relative`}
+          >
+            {/* User Icon */}
+            <AntDesign name="user" size={18} color="white" />
+
+            {/* Online Status Dot */}
+            <View
+              style={tailwind`
+          w-2 h-2 
+          bg-green-500 
+          rounded-full 
+          absolute 
+          bottom-0 
+          right-0 
+          border-2 
+          border-white
+        `}
+            />
+          </View>
         </TouchableOpacity>
       </View>
     </View>

@@ -1,112 +1,108 @@
 import {
-    View,
-    Text,
-    ActivityIndicator,
-    StyleSheet,
-    ScrollView,
-    FlatList,
-    Image,
-  } from "react-native";
-  import Header from "@/components/Header";
-  import { usePrayerTimes } from "@/hooks/usePrayerTimes";
-  import { useAppStore } from "@/store/appStore";
-  import CountdownCard from "@/components/CountDownCard";
-  import { getCurrentAndNextPrayer } from "@/utils/prayerUtils";
-  import RamadanCard from "@/components/RamadanCard";
-  import NotificationBanner from "@/components/NotificationsBanner";
-  import { colors } from "@/theme/color";
-  import RamadanBanner from "@/components/RamadanBanner";
-  import { useScheduleDailyNotifications } from "@/hooks/useDailyNotifications";
- 
-  
-  const stories = [
-    { id: "1", img: "https://picsum.photos/200/300" },
-    { id: "2", img: "https://picsum.photos/203/300" },
-    { id: "3", img: "https://picsum.photos/202/300" },
-    { id: "4", img: "https://picsum.photos/203/300" },
-  ];
-  
-  export default function HomeScreen() {
-    const { loading } = usePrayerTimes();
-    const prayers = useAppStore((s) => s.prayerTimes);
-    const isRamadan = useAppStore((s) => s.isRamadan);
-    const prayerInfo = prayers ? getCurrentAndNextPrayer(prayers) : null; 
-    //notification hook to schedule daily notifications based on prayer times, it will reschedule every time prayer times change (like after midnight or if user changes location/settings)
-    useScheduleDailyNotifications(prayers);   
-    
-    if (loading) {
-      return (
-        <View style={styles.center}>
-          <ActivityIndicator size="large" color={colors.primary} />
-          <Text style={{ color: colors.textPrimary }}>Loading prayer times...</Text>
-        </View>
-      );
-    }
-  
-    if (!prayers) {
-      return (
-        <View style={styles.center}>
-          <Text style={{ color: colors.textPrimary }}>No data available</Text>
-        </View>
-      );
-    }
-   
+  View,
+  Text,
+  ActivityIndicator,
+  StyleSheet,
+  ScrollView,
+  FlatList,
+  Image,
+} from "react-native";
+import Header from "@/components/Header";
+import { usePrayerTimes } from "@/hooks/usePrayerTimes";
+import { useAppStore } from "@/store/appStore";
+import CountdownCard from "@/components/CountDownCard";
+import { getCurrentAndNextPrayer } from "@/utils/prayerUtils";
+import RamadanCard from "@/components/RamadanCard";
+import NotificationBanner from "@/components/NotificationsBanner";
+import { colors } from "@/theme/color";
+import RamadanBanner from "@/components/RamadanBanner";
+import { useScheduleDailyNotifications } from "@/hooks/useDailyNotifications";
 
-  
+const stories = [
+  { id: "1", img: "https://picsum.photos/200/300" },
+  { id: "2", img: "https://picsum.photos/203/300" },
+  { id: "3", img: "https://picsum.photos/202/300" },
+  { id: "4", img: "https://picsum.photos/203/300" },
+];
+
+export default function HomeScreen() {
+  const { loading } = usePrayerTimes();
+  const prayers = useAppStore((s) => s.prayerTimes);
+  const isRamadan = useAppStore((s) => s.isRamadan);
+  const prayerInfo = prayers ? getCurrentAndNextPrayer(prayers) : null;
+  //notification hook to schedule daily notifications based on prayer times, it will reschedule every time prayer times change (like after midnight or if user changes location/settings)
+  useScheduleDailyNotifications(prayers);
+
+  if (loading) {
     return (
-      <View style={styles.container}>
-        <ScrollView showsVerticalScrollIndicator={false}>
-          <Header />
-  
-          {/* Countdown Card */}
-          {prayerInfo && (
-            <CountdownCard
-              key={`${prayerInfo.current}-${prayerInfo.next}`}
-              current={prayerInfo.current}
-              currentTime={prayerInfo.currentTime}
-              next={prayerInfo.next}
-              nextTime={prayerInfo.nextTime}
-              
-            />
-          )}
-  
-          {/* Notification Banner */}
-          <NotificationBanner />
-  
-          {/* Ramadan Card */}
-          {isRamadan && ( <RamadanBanner /> )}
-          {isRamadan && <RamadanCard timings={prayers} />}
-  
-          {/* Latest Stories */}
-          <Text style={styles.sectionTitle}>Latest Stories</Text>
-          <FlatList
-            horizontal
-            data={stories}
-            keyExtractor={(item) => item.id}
-            showsHorizontalScrollIndicator={false}
-            renderItem={({ item }) => (
-              <Image source={{ uri: item.img }} style={styles.storyImage} />
-            )}
-          />
-          
-          {/* Goals Progress */}
-          <View style={styles.goalCard}>
-            <Text style={styles.goalTitle}>Complete 5 more goals today</Text>
-  
-            <View style={styles.progressBar}>
-              <View style={[styles.progress, { width: "60%" }]} />
-            </View>
-  
-            <Text style={styles.goalStats}>
-              3/5 Prayers • 5/6 Dhikr • 1/2 Ramadan
-            </Text>
-          </View>
-        </ScrollView>
+      <View style={styles.center}>
+        <ActivityIndicator size="large" color={colors.primary} />
+        <Text style={{ color: colors.textPrimary }}>
+          Loading prayer times...
+        </Text>
       </View>
     );
   }
 
+  if (!prayers) {
+    return (
+      <View style={styles.center}>
+        <Text style={{ color: colors.textPrimary }}>No data available</Text>
+      </View>
+    );
+  }
 
+  return (
+    <View style={styles.container}>
+      {/* Sticky Header */}
+      <Header />
+      <ScrollView showsVerticalScrollIndicator={false}>
+        {/* Countdown Card */}
+        {prayerInfo && (
+          <CountdownCard
+            key={`${prayerInfo.current}-${prayerInfo.next}`}
+            current={prayerInfo.current}
+            currentTime={prayerInfo.currentTime}
+            next={prayerInfo.next}
+            nextTime={prayerInfo.nextTime}
+          />
+        )}
+
+        {/* Notification Banner */}
+        <NotificationBanner />
+
+        {/* Ramadan Card */}
+        {isRamadan && <RamadanBanner />}
+        {isRamadan && <RamadanCard timings={prayers} />}
+
+        {/* Latest Stories */}
+        <Text style={styles.sectionTitle}>Latest Stories</Text>
+        <FlatList
+          horizontal
+          data={stories}
+          keyExtractor={(item) => item.id}
+          showsHorizontalScrollIndicator={false}
+          renderItem={({ item }) => (
+            <Image source={{ uri: item.img }} style={styles.storyImage} />
+          )}
+        />
+
+        {/* Goals Progress */}
+        <View style={styles.goalCard}>
+          <Text style={styles.goalTitle}>Complete 5 more goals today</Text>
+
+          <View style={styles.progressBar}>
+            <View style={[styles.progress, { width: "60%" }]} />
+          </View>
+
+          <Text style={styles.goalStats}>
+            3/5 Prayers • 5/6 Dhikr • 1/2 Ramadan
+          </Text>
+        </View>
+      </ScrollView>
+    </View>
+  );
+}
 
 const styles = StyleSheet.create({
   container: {
@@ -171,4 +167,3 @@ const styles = StyleSheet.create({
     fontSize: 12,
   },
 });
-
