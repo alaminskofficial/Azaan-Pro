@@ -21,7 +21,7 @@ export const usePrayerTimes = () => {
 
       const cached = await AsyncStorage.getItem(key);
       if (cached) {
-        console.log("Using cached prayer times for today. Will refresh in background.");
+        //console.log("Using cached prayer times for today. Will refresh in background.");
         applyTodayData(JSON.parse(cached));
         setLoading(false);
         refreshInBackground(cached , key ,method, madhab);

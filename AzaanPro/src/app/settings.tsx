@@ -1,11 +1,12 @@
-import React, { act } from "react";
-import { View, Text, StyleSheet , TouchableOpacity } from "react-native";
+import React from "react";
+import { View, Text, StyleSheet, TouchableOpacity } from "react-native";
 import { Picker } from "@react-native-picker/picker";
 import { useAppStore } from "@/store/appStore";
 import { colors } from "@/theme/color";
 import { getMethodName, METHOD_IDS } from "@/utils/methodUtils";
 import { getUserLocation } from "@/services/locationServices";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import Constants from "expo-constants";
 
 export default function Settings() {
   const method = useAppStore((s) => s.method);
@@ -27,21 +28,30 @@ export default function Settings() {
   const updateLocation = async () => {
     const loc = await getUserLocation();
     if (!loc) return;
-  
+
     setLocation(loc);
     setCity(loc.city || "Your Location");
     await AsyncStorage.setItem("last_location", JSON.stringify(loc));
+    alert(`Location updated to ${loc.city}`);
   };
 
   return (
     <View style={styles.container}>
       <Text style={styles.header}>App Settings</Text>
       <View style={styles.card}>
-        <Text style={styles.label}>Current Location</Text>
-        <Text style={styles.value}>{city || "Detecting..."} ({location?.latitude} : {location?.longitude})</Text>
+        <Text style={styles.label}>Location</Text>
 
-        <TouchableOpacity onPress={updateLocation}>
-          <Text style={styles.action}>Auto Detect</Text>
+        <Text style={styles.locationCity}>📍 {city || "Not set"}</Text>
+
+        {location && (
+          <Text style={styles.locationCoords}>
+            Lat {location.latitude.toFixed(4)} • Lon{" "}
+            {location.longitude.toFixed(4)}
+          </Text>
+        )}
+
+        <TouchableOpacity style={styles.detectBtn} onPress={updateLocation}>
+          <Text style={styles.detectText}>Auto Detect Location</Text>
         </TouchableOpacity>
       </View>
 
@@ -128,6 +138,11 @@ export default function Settings() {
 
         <Text style={styles.helper}>Adjust if local moon sighting differs</Text>
       </View>
+      <View style={styles.versionBox}>
+  <Text style={styles.versionText}>
+    App Version {Constants.expoConfig?.version ?? "1.0.0"}
+  </Text>
+</View>
     </View>
   );
 }
@@ -149,12 +164,11 @@ const styles = StyleSheet.create({
   card: {
     backgroundColor: colors.surface,
     padding: 18,
-    borderRadius: 16,
-    marginBottom: 20,
+    borderRadius: 18,
+    marginBottom: 18,
     borderWidth: 1,
     borderColor: colors.border,
   },
-
   label: {
     fontSize: 14,
     color: colors.textSecondary,
@@ -182,8 +196,45 @@ const styles = StyleSheet.create({
     color: colors.textPrimary,
     marginBottom: 12,
   },
-  action: { 
+  action: {
     color: colors.primary,
     fontWeight: "600",
-  },  
+  },
+  locationCity: {
+    fontSize: 17,
+    fontWeight: "600",
+    color: colors.textPrimary,
+  },
+
+  locationCoords: {
+    fontSize: 13,
+    color: colors.textMuted,
+    marginTop: 4,
+  },
+
+  detectBtn: {
+    marginTop: 14,
+    alignSelf: "flex-start",
+    paddingHorizontal: 14,
+    paddingVertical: 8,
+    borderRadius: 10,
+    backgroundColor: colors.surfaceLight,
+    borderWidth: 1,
+    borderColor: colors.border,
+  },
+
+  detectText: {
+    color: colors.primary,
+    fontWeight: "600",
+  },
+  versionBox: {
+    marginTop: "auto",
+    alignItems: "center",
+    paddingVertical: 20,
+  },
+  
+  versionText: {
+    fontSize: 12,
+    color: colors.textMuted,
+  },
 });

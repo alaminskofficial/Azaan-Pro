@@ -13,7 +13,7 @@ export const useBootstrapLocation = () => {
 
       // 2️. Try AsyncStorage
       const saved = await AsyncStorage.getItem("last_location");
-      console.log("Bootstrapping location, found in storage:", !!saved);
+      //console.log("Bootstrapping location, found in storage:", !!saved);
       if (saved) {
         const loc = JSON.parse(saved);
         store.setLocation(loc);
