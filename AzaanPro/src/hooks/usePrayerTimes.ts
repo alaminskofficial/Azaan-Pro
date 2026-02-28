@@ -8,6 +8,7 @@ export const usePrayerTimes = () => {
   const method = useAppStore((s) => s.method);
   const madhab = useAppStore((s) => s.madhab);
   const location = useAppStore((s) => s.location);
+  const hijriOffset = useAppStore((s) => s.hijriOffset);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -33,7 +34,7 @@ export const usePrayerTimes = () => {
     };
 
     init();
-  }, [method, madhab, location?.latitude, location?.longitude]);
+  }, [method, madhab,hijriOffset, location?.latitude, location?.longitude]);
 
   return { loading };
 };
