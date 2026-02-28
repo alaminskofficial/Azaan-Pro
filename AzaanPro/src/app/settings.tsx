@@ -1,9 +1,11 @@
-import React from "react";
-import { View, Text, StyleSheet } from "react-native";
+import React, { act } from "react";
+import { View, Text, StyleSheet , TouchableOpacity } from "react-native";
 import { Picker } from "@react-native-picker/picker";
 import { useAppStore } from "@/store/appStore";
 import { colors } from "@/theme/color";
 import { getMethodName, METHOD_IDS } from "@/utils/methodUtils";
+import { getUserLocation } from "@/services/locationServices";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 export default function Settings() {
   const method = useAppStore((s) => s.method);
@@ -12,15 +14,36 @@ export default function Settings() {
   const setMadhab = useAppStore((s) => s.setMadhab);
   const hijriOffset = useAppStore((s) => s.hijriOffset);
   const setHijriOffset = useAppStore((s) => s.setHijriOffset);
+  const setCity = useAppStore((s) => s.setCity);
+  const city = useAppStore((s) => s.city);
+  const setLocation = useAppStore((s) => s.setLocation);
+  const location = useAppStore((s) => s.location);
 
   const METHODS = METHOD_IDS.map((id) => ({
     id,
     name: getMethodName(id),
   }));
 
+  const updateLocation = async () => {
+    const loc = await getUserLocation();
+    if (!loc) return;
+  
+    setLocation(loc);
+    setCity(loc.city || "Your Location");
+    await AsyncStorage.setItem("last_location", JSON.stringify(loc));
+  };
+
   return (
     <View style={styles.container}>
-      <Text style={styles.header}>Prayer Settings</Text>
+      <Text style={styles.header}>App Settings</Text>
+      <View style={styles.card}>
+        <Text style={styles.label}>Current Location</Text>
+        <Text style={styles.value}>{city || "Detecting..."} ({location?.latitude} : {location?.longitude})</Text>
+
+        <TouchableOpacity onPress={updateLocation}>
+          <Text style={styles.action}>Auto Detect</Text>
+        </TouchableOpacity>
+      </View>
 
       {/* Calculation Method */}
       <View style={styles.card}>
@@ -154,4 +177,13 @@ const styles = StyleSheet.create({
     color: colors.textMuted,
     marginTop: 6,
   },
+  value: {
+    fontSize: 16,
+    color: colors.textPrimary,
+    marginBottom: 12,
+  },
+  action: { 
+    color: colors.primary,
+    fontWeight: "600",
+  },  
 });

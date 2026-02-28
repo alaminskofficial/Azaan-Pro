@@ -1,8 +1,14 @@
 import { create } from "zustand";
 
+type LocationType = {
+  latitude: number;
+  longitude: number;
+  city?: string;
+};
+
 interface AppState {
   city: string;
-  location: { latitude: number; longitude: number ; city?: string } | null;
+  location: LocationType | null;
   prayerTimes: any;
   monthlyPrayerTimes: any;
   method: number;

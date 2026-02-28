@@ -1,79 +1,39 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { fetchMonthlyPrayerTimes } from "@/services/prayerServices";
-import {
-  requestNotificationPermission,
-  schedulePrayerNotifications,
-} from "@/services/notificationService";
-import { applyTodayData } from "@/utils/applyTodayData";
 import { getUserLocation } from "@/services/locationServices";
-import { useScheduleDailyNotifications } from "@/hooks/useDailyNotifications";
+import { applyTodayData } from "@/utils/applyTodayData";
 import { useAppStore } from "@/store/appStore";
 
-type LocationType = {
-  latitude: number;
-  longitude: number;
-  city?: string;
-};
-
-const refreshInBackground = async (
-  loc: LocationType | null,
+export const refreshInBackground = async (
+  cachedData: string | null = null,
   cacheKey: string,
   method: number,
-  school: string
+  madhab: string
 ) => {
-  try {
-    let finalLocation: LocationType | null = loc;
-    /* ---------- 1️⃣ Fallback to stored location ---------- */
-    if (!finalLocation) {
-      const stored = await AsyncStorage.getItem("last_location");
-      if (stored) {
-        finalLocation = JSON.parse(stored);
-      }
-    }
+  const store = useAppStore.getState();
 
-    /* ---------- 2️⃣ Fallback to device location ---------- */
-    if (!finalLocation) {
-      finalLocation = await getUserLocation();
-    }
+  let loc = store.location;
 
-    /* ---------- 3️⃣ Still no location → exit safely ---------- */
-    if (!finalLocation) {
-      console.log("No location available, skipping background refresh");
-      return;
-    }
-    const store = useAppStore.getState();
-    const setCity = store.setCity;
-    const setLocation = store.setLocation;
-    setLocation(finalLocation);
-    setCity(finalLocation.city || "Your Location");
-    const monthlyData = await fetchMonthlyPrayerTimes(
-      finalLocation.latitude,
-      finalLocation.longitude,
+  if (!loc) {
+    const saved = await AsyncStorage.getItem("last_location");
+    if (saved) loc = JSON.parse(saved);
+  }
+
+  if (!loc) loc = await getUserLocation();
+  if (!loc) return;
+
+  store.setLocation(loc);
+  store.setCity(loc.city || "Your Location");
+  await AsyncStorage.setItem("last_location", JSON.stringify(loc));
+  if (!cachedData) {
+    const monthly = await fetchMonthlyPrayerTimes(
+      loc.latitude,
+      loc.longitude,
       method,
-      school === "hanafi" ? 1 : 0
+      madhab === "hanafi" ? 1 : 0
     );
 
-    await AsyncStorage.setItem(cacheKey, JSON.stringify(monthlyData));
-    await AsyncStorage.setItem("last_location", JSON.stringify(finalLocation));
-
-    applyTodayData(monthlyData);
-    // console.log(
-    //   "monthly data refreshed in background",
-    //   monthlyData[new Date().getDate() - 1].timings
-    // );
-
-    // Schedule notifications WITHOUT blocking UI
-    // requestNotificationPermission().then((granted) => {
-    //   if (granted) {
-    //     schedulePrayerNotifications(
-    //       monthlyData[new Date().getDate() - 1].timings
-    //     );
-    //   }
-    // });
-    //useScheduleDailyNotifications(monthlyData[new Date().getDate() - 1].timings);
-  } catch (e) {
-    console.log("Background refresh error", e);
+    await AsyncStorage.setItem(cacheKey, JSON.stringify(monthly));
+    applyTodayData(monthly);
   }
 };
-
-export { refreshInBackground };

@@ -17,6 +17,7 @@ import NotificationBanner from "@/components/NotificationsBanner";
 import { colors } from "@/theme/color";
 import RamadanBanner from "@/components/RamadanBanner";
 import { useScheduleDailyNotifications } from "@/hooks/useDailyNotifications";
+import { useBootstrapLocation } from "@/hooks/useBootstrapLocation";
 
 const stories = [
   { id: "1", img: "https://picsum.photos/200/300" },
@@ -26,6 +27,8 @@ const stories = [
 ];
 
 export default function HomeScreen() {
+  //console.log("Rendering Home Screen");
+  useBootstrapLocation(); // Hook to get user location on app startup and set it in the store
   const { loading } = usePrayerTimes();
   const prayers = useAppStore((s) => s.prayerTimes);
   const isRamadan = useAppStore((s) => s.isRamadan);

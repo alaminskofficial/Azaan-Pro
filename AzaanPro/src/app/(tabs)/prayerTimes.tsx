@@ -21,15 +21,12 @@ export default function PrayerTimesScreen() {
   const monthlyPrayerTimes = useAppStore((s) => s.monthlyPrayerTimes);
   const prayers = useAppStore((s) => s.prayerTimes);
   const prayerInfo = prayers ? getCurrentAndNextPrayer(prayers) : null;
-  //console.log("Prayer info:", prayerInfo);
-  //console.log("Monthly prayer times:", monthlyPrayerTimes);
   const currentPrayer = prayerInfo?.current || null;
   const flatListRef = useRef<FlatList>(null);
   const [activeIndex, setActiveIndex] = useState(0);
   const madhab = useAppStore((s) => s.madhab);
   const method = useAppStore((s) => s.method);
 
-  //monthlyPrayerTimes is already array , 7 days data i will take for shoiw in flatlist
   const days = useMemo(() => {
     if (!monthlyPrayerTimes || !monthlyPrayerTimes.length) return [];
 
@@ -45,11 +42,10 @@ export default function PrayerTimesScreen() {
 
     const index = startIndex >= 0 ? startIndex : 0;
 
-    // Today + next 6 days
     return monthlyPrayerTimes.slice(index, index + 7);
   }, [monthlyPrayerTimes]);
 
-  const todayIndex = 0; // Since we already slice from today, the first item is always today
+  const todayIndex = 0;
 
   useEffect(() => {
     if (flatListRef.current && days.length) {
@@ -83,7 +79,11 @@ export default function PrayerTimesScreen() {
     return (
       <View style={styles.page}>
         <Text style={styles.date}>{formattedDate}</Text>
-        <PrayerRow name="Sehri Ends (Imsak)" time={cleanTime(t?.Imsak)} active={currentPrayer === "Imsak"} />
+        <PrayerRow
+          name="Sehri Ends (Imsak)"
+          time={cleanTime(t?.Imsak)}
+          active={currentPrayer === "Imsak"}
+        />
         <PrayerRow
           name="Fajr"
           time={cleanTime(t?.Fajr)}
@@ -119,7 +119,11 @@ export default function PrayerTimesScreen() {
           time={cleanTime(t?.Midnight)}
           active={currentPrayer === "Midnight"}
         />
-        <PrayerRow name="Qiyam (Last Third)" time={cleanTime(t?.Lastthird)}  active={currentPrayer === "Lastthird"}/>
+        <PrayerRow
+          name="Qiyam (Last Third)"
+          time={cleanTime(t?.Lastthird)}
+          active={currentPrayer === "Lastthird"}
+        />
       </View>
     );
   };
@@ -156,8 +160,7 @@ export default function PrayerTimesScreen() {
       </View>
 
       {/* 20% Bottom Info */}
-      {/* later i have to add functionality like if madhab and method chnages ,
-       re fetch data from server and update the storage ,similar this func already in settings */}
+
       <View style={styles.bottomPanel}>
         <Text style={styles.bottomTitle}>Calculation Settings</Text>
 
@@ -176,10 +179,6 @@ export default function PrayerTimesScreen() {
     </View>
   );
 }
-
-/* ---------- Components ---------- */
-
-/* ---------- Styles ---------- */
 
 const styles = StyleSheet.create({
   page: {

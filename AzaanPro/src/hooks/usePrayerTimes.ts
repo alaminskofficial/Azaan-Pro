@@ -5,52 +5,35 @@ import { applyTodayData } from "@/utils/applyTodayData";
 import { refreshInBackground } from "@/utils/refreshInBackground";
 
 export const usePrayerTimes = () => {
-  const setCity = useAppStore((s) => s.setCity); // later also we can add this to settings and make it more dynamic once user manually selects city from search instead of auto location detection
-  const setLocation = useAppStore((s) => s.setLocation); // later also we can add this to settings and make it dynamic once user manually selects city from search instead of auto location detection
   const method = useAppStore((s) => s.method);
-  const school = useAppStore((s) => s.madhab);
-
+  const madhab = useAppStore((s) => s.madhab);
+  const location = useAppStore((s) => s.location);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    init();
-  }, [method, school]); // refetch if user changes settings
+    if (!location) return;
 
-  const init = async () => {
-    try {
+    const init = async () => {
       setLoading(true);
-  
-      const today = new Date();
-      const month = today.getMonth() + 1;
-      const year = today.getFullYear();
-  
-      const lastLocationStr = await AsyncStorage.getItem("last_location");
-      //console.log("Last location from storage:", lastLocationStr);
-      const loc = lastLocationStr ? JSON.parse(lastLocationStr) : null;
 
-      const cacheKey = `prayer_${loc?.latitude}_${loc?.longitude}_${month}_${year}_${method}_${school}`;
-      const cached = await AsyncStorage.getItem(cacheKey);
-  
-      // PHASE 1 — Show Cached Immediately
+      const today = new Date();
+      const key = `prayer_${location.latitude}_${location.longitude}_${today.getMonth() + 1}_${today.getFullYear()}_${method}_${madhab}`;
+
+      const cached = await AsyncStorage.getItem(key);
       if (cached) {
-        const monthlyData = JSON.parse(cached);
-        applyTodayData(monthlyData);
+        console.log("Using cached prayer times for today. Will refresh in background.");
+        applyTodayData(JSON.parse(cached));
         setLoading(false);
-  
-        // Background refresh
-        refreshInBackground(loc, cacheKey , method , school);
+        refreshInBackground(cached , key ,method, madhab);
         return;
       }
-  
-      // If no cache → fetch normally
-      await refreshInBackground(loc, cacheKey , method , school);
+
+      await refreshInBackground(null ,key , method, madhab);
       setLoading(false);
-  
-    } catch (error) {
-      console.log(error);
-      setLoading(false);
-    }
-  };
+    };
+
+    init();
+  }, [method, madhab, location?.latitude, location?.longitude]);
 
   return { loading };
 };
