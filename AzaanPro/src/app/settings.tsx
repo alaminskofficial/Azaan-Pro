@@ -39,20 +39,22 @@ export default function Settings() {
     <View style={styles.container}>
       <Text style={styles.header}>App Settings</Text>
       <View style={styles.card}>
-        <Text style={styles.label}>Location</Text>
+        <View style={{ alignItems: "center", alignSelf: "center" }}>
+          <Text style={styles.label}> Location</Text>
 
-        <Text style={styles.locationCity}>📍 {city || "Not set"}</Text>
+          <Text style={styles.locationCity}>📍 {city || "Not set"}</Text>
 
-        {location && (
-          <Text style={styles.locationCoords}>
-            Lat {location.latitude.toFixed(4)} • Lon{" "}
-            {location.longitude.toFixed(4)}
-          </Text>
-        )}
+          {location && (
+            <Text style={styles.locationCoords}>
+              Lat {location.latitude.toFixed(4)} • Lon{" "}
+              {location.longitude.toFixed(4)}
+            </Text>
+          )}
 
-        <TouchableOpacity style={styles.detectBtn} onPress={updateLocation}>
-          <Text style={styles.detectText}>Auto Detect Location</Text>
-        </TouchableOpacity>
+          <TouchableOpacity style={styles.detectBtn} onPress={updateLocation}>
+            <Text style={styles.detectText}>Auto Detect Location</Text>
+          </TouchableOpacity>
+        </View>
       </View>
 
       {/* Calculation Method */}
@@ -136,13 +138,17 @@ export default function Settings() {
           </Picker>
         </View>
 
-        <Text style={styles.helper}>Adjust if local moon sighting differs</Text>
+        <Text style={styles.helper}>
+          {" "}
+          Note: Adjust if local moon sighting differs
+        </Text>
       </View>
       <View style={styles.versionBox}>
-  <Text style={styles.versionText}>
-    App Version {Constants.expoConfig?.version ?? "1.0.0"}
-  </Text>
-</View>
+        <Text style={styles.versionText}>
+          App Version {Constants.expoConfig?.version ?? "1.0.0"}
+        </Text>
+        <Text style={styles.versionText}>Developed by Alamin ( Azaan Pro )</Text>
+      </View>
     </View>
   );
 }
@@ -158,16 +164,20 @@ const styles = StyleSheet.create({
     fontWeight: "600",
     color: colors.textPrimary,
     marginTop: 25,
-    marginBottom: 25,
+    marginBottom: 20,
   },
-
   card: {
     backgroundColor: colors.surface,
-    padding: 18,
+    padding: 16,
     borderRadius: 18,
-    marginBottom: 18,
+    marginBottom: 16,
     borderWidth: 1,
     borderColor: colors.border,
+  },
+  centerCard: {
+    alignSelf: "center",
+    width: "100%", // or "90%"
+    maxWidth: 420, // keeps it nice on tablets
   },
   label: {
     fontSize: 14,
@@ -232,7 +242,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     paddingVertical: 20,
   },
-  
+
   versionText: {
     fontSize: 12,
     color: colors.textMuted,
