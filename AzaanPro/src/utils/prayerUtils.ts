@@ -1,57 +1,83 @@
+export const prayerOrder = [
+  "Imsak",
+  "Fajr",
+  "Sunrise",
+  "Dhuhr",
+  "Asr",
+  "Maghrib",
+  "Isha",
+  "Midnight",
+  "Lastthird",
+];
+const DAY_PRAYERS = [
+  "Imsak",
+  "Fajr",
+  "Sunrise",
+  "Dhuhr",
+  "Asr",
+  "Maghrib",
+  "Isha",
+];
+
+const NIGHT_PRAYERS = ["Firstthird", "Midnight", "Lastthird"];
+
 export function getCurrentAndNextPrayer(timings: any) {
   const now = new Date();
-  //console.log("Calculating current/next prayer for timings:", timings);
-  // Dynamic prayer order (can be reused anywhere)
-  const prayerOrder = ["Imsak","Fajr","Sunrise", "Dhuhr", "Asr", "Maghrib", "Isha" ,"Midnight" ,"Lastthird"];
-  
-  // Convert to array of objects
-  const todayTimes = prayerOrder.map((name) => {
-    const [hour, minute] = timings[name].split(":");
+  const today = new Date();
+  const tomorrow = new Date();
+  tomorrow.setDate(today.getDate() + 1);
 
-    const time = new Date();
-    time.setHours(parseInt(hour));
-    time.setMinutes(parseInt(minute));
-    time.setSeconds(0);
-    time.setMilliseconds(0);
+  const timeline: { name: string; time: Date }[] = [];
 
-    return { name, time };
-  });
- //console.log("Parsed today's prayer times:", todayTimes);
-  // Find next prayer
-  let nextPrayer = null;
-  let currentPrayer = null;
+  // 1️. Day prayers (today)
+  for (const name of DAY_PRAYERS) {
+    if (!timings[name]) continue;
 
-  for (let i = 0; i < todayTimes.length; i++) {
-    if (todayTimes[i].time > now) {
-      nextPrayer = todayTimes[i];
-      currentPrayer = i === 0 ? todayTimes[todayTimes.length - 1] : todayTimes[i - 1];
+    const { h, m } = parseTime(timings[name]);
+    const d = new Date(today);
+    d.setHours(h, m, 0, 0);
+
+    timeline.push({ name, time: d });
+  }
+
+  // 2️. Night prayers (after Isha → tomorrow)
+  for (const name of NIGHT_PRAYERS) {
+    if (!timings[name]) continue;
+
+    const { h, m } = parseTime(timings[name]);
+    const d = new Date(tomorrow);
+    d.setHours(h, m, 0, 0);
+
+    timeline.push({ name, time: d });
+  }
+
+  // 3️. Sort timeline
+  timeline.sort((a, b) => a.time.getTime() - b.time.getTime());
+
+  // 4️. Find current & next
+  let current = timeline[timeline.length - 1];
+  let next = timeline[0];
+
+  for (let i = 0; i < timeline.length; i++) {
+    if (timeline[i].time > now) {
+      next = timeline[i];
+      current = timeline[i - 1] ?? current;
       break;
     }
   }
 
-  // If after Isha → next is tomorrow Fajr
-  if (!nextPrayer) {
-    currentPrayer = todayTimes[todayTimes.length - 1];
-    nextPrayer = todayTimes[0];
-
-    // set next prayer to tomorrow
-    const tomorrow = new Date();
-    tomorrow.setDate(tomorrow.getDate() + 1);
-    tomorrow.setHours(nextPrayer.time.getHours());
-    tomorrow.setMinutes(nextPrayer.time.getMinutes());
-    tomorrow.setSeconds(0);
-
-    nextPrayer = {
-      name: nextPrayer.name,
-      time: tomorrow,
-    };
-  }
-
   return {
-    current: currentPrayer?.name,
-    currentTime : currentPrayer?.time,
-    next: nextPrayer.name,
-    nextTime: nextPrayer.time,
-    todayTimes, // useful for progress calculation / prayer list
+    current: current.name,
+    currentTime: current.time,
+    next: next.name,
+    nextTime: next.time,
+    timeline,
   };
+}
+
+function parseTime(timeStr: string) {
+  // "02:33 (IST)" → ["02","33"]
+  const clean = timeStr.split(" ")[0];
+  const [h, m] = clean.split(":").map(Number);
+  return { h, m };
 }

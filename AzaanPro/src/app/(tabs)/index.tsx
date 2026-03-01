@@ -18,23 +18,49 @@ import { colors } from "@/theme/color";
 import RamadanBanner from "@/components/RamadanBanner";
 import { useScheduleDailyNotifications } from "@/hooks/useDailyNotifications";
 import { useBootstrapLocation } from "@/hooks/useBootstrapLocation";
-
-const stories = [
-  { id: "1", img: "https://picsum.photos/200/300" },
-  { id: "2", img: "https://picsum.photos/203/300" },
-  { id: "3", img: "https://picsum.photos/202/300" },
-  { id: "4", img: "https://picsum.photos/203/300" },
-];
+import { useEffect, useRef, useState } from "react";
+import { stories } from "@/utils/storyUtils";
 
 export default function HomeScreen() {
   //console.log("Rendering Home Screen");
   useBootstrapLocation(); // Hook to get user location on app startup and set it in the store
   const { loading } = usePrayerTimes();
   const prayers = useAppStore((s) => s.prayerTimes);
+  const [prayerInfo, setPrayerInfo] = useState<any>(null);
+  const timeoutRef = useRef<NodeJS.Timeout | null>(null);
   const isRamadan = useAppStore((s) => s.isRamadan);
-  const prayerInfo = prayers ? getCurrentAndNextPrayer(prayers) : null;
+  console.log("Prayers from store:", prayerInfo);
+  //const prayerInfo = prayers ? getCurrentAndNextPrayer(prayers) : null;
   //notification hook to schedule daily notifications based on prayer times, it will reschedule every time prayer times change (like after midnight or if user changes location/settings)
   useScheduleDailyNotifications(prayers);
+  useEffect(() => {
+    if (!prayers) return;
+
+    const schedulePrayerUpdate = () => {
+      const now = new Date();
+      const info = getCurrentAndNextPrayer(prayers);
+
+      setPrayerInfo(info);
+
+      if (timeoutRef.current) clearTimeout(timeoutRef.current);
+
+      if (!info?.nextTime) return;
+
+      const delay = info.nextTime.getTime() - now.getTime();
+
+      if (delay > 0) {
+        timeoutRef.current = setTimeout(() => {
+          schedulePrayerUpdate();
+        }, delay);
+      }
+    };
+
+    schedulePrayerUpdate();
+
+    return () => {
+      if (timeoutRef.current) clearTimeout(timeoutRef.current);
+    };
+  }, [prayers]);
 
   if (loading) {
     return (
@@ -86,11 +112,14 @@ export default function HomeScreen() {
           keyExtractor={(item) => item.id}
           showsHorizontalScrollIndicator={false}
           renderItem={({ item }) => (
-            <Image source={{ uri: item.img }} style={styles.storyImage} />
+            <Image
+              source={{uri: item.img}}
+              style={styles.storyImage}
+            />
           )}
         />
 
-        {/* Goals Progress */}
+        {/* Goals Progress --todo */}
         <View style={styles.goalCard}>
           <Text style={styles.goalTitle}>Complete 5 more goals today</Text>
 

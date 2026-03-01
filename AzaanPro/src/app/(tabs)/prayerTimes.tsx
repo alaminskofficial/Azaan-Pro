@@ -115,6 +115,11 @@ export default function PrayerTimesScreen() {
           active={currentPrayer === "Isha"}
         />
         <PrayerRow
+          name="First Third"
+          time={cleanTime(t?.Firstthird)}
+          active={currentPrayer === "Firstthird"}
+        />
+        <PrayerRow
           name="Midnight"
           time={cleanTime(t?.Midnight)}
           active={currentPrayer === "Midnight"}
@@ -256,11 +261,11 @@ const styles = StyleSheet.create({
   },
 
   listContainer: {
-    flex: 0.8, // 80%
+    flex: 0.85, // 80%
   },
 
   bottomPanel: {
-    flex: 0.2, // 20%
+    flex: 0.15, // 20%
     backgroundColor: colors.surface,
     borderTopLeftRadius: 20,
     borderTopRightRadius: 20,

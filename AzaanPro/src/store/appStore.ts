@@ -9,7 +9,7 @@ type LocationType = {
 interface AppState {
   city: string;
   location: LocationType | null;
-  prayerTimes: any;
+  prayerTimes: any; //todays prayer times
   monthlyPrayerTimes: any;
   method: number;
   madhab: string;
