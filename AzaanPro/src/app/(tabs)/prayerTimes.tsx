@@ -10,9 +10,9 @@ import {
 import { usePrayerTimes } from "@/hooks/usePrayerTimes";
 import { useAppStore } from "@/store/appStore";
 import { colors } from "@/theme/color";
-import { getCurrentAndNextPrayer } from "@/utils/prayerUtils";
 import { cleanTime, getMethodName } from "@/utils/methodUtils";
 import PrayerRow from "@/components/PrayerRow";
+import { usePrayerTracker } from "@/hooks/usePrayerTracker";
 
 const { width } = Dimensions.get("window");
 
@@ -20,13 +20,13 @@ export default function PrayerTimesScreen() {
   const { loading } = usePrayerTimes();
   const monthlyPrayerTimes = useAppStore((s) => s.monthlyPrayerTimes);
   const prayers = useAppStore((s) => s.prayerTimes);
-  const prayerInfo = prayers ? getCurrentAndNextPrayer(prayers) : null;
-  const currentPrayer = prayerInfo?.current || null;
+  const prayerInfo = usePrayerTracker(prayers);
+
   const flatListRef = useRef<FlatList>(null);
   const [activeIndex, setActiveIndex] = useState(0);
   const madhab = useAppStore((s) => s.madhab);
   const method = useAppStore((s) => s.method);
-
+  const currentPrayer = prayerInfo?.current || null;
   const days = useMemo(() => {
     if (!monthlyPrayerTimes || !monthlyPrayerTimes.length) return [];
 

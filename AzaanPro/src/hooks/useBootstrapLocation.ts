@@ -4,6 +4,8 @@ import { useAppStore } from "@/store/appStore";
 import { getUserLocation } from "@/services/locationServices";
 
 export const useBootstrapLocation = () => {
+  // This hook runs once on app start to initialize location from storage or auto-detect
+  //later we add madhab , method and hijri offset here as well if we want to persist them in storage and not just rely on app store (which is reset on app restart)
   useEffect(() => {
     const bootstrap = async () => {
       const store = useAppStore.getState();

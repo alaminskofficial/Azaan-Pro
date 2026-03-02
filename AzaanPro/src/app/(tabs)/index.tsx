@@ -18,49 +18,19 @@ import { colors } from "@/theme/color";
 import RamadanBanner from "@/components/RamadanBanner";
 import { useScheduleDailyNotifications } from "@/hooks/useDailyNotifications";
 import { useBootstrapLocation } from "@/hooks/useBootstrapLocation";
-import { useEffect, useRef, useState } from "react";
+import { usePrayerTracker } from "@/hooks/usePrayerTracker";
 import { stories } from "@/utils/storyUtils";
 
 export default function HomeScreen() {
-  //console.log("Rendering Home Screen");
-  useBootstrapLocation(); // Hook to get user location on app startup and set it in the store
+  useBootstrapLocation(); 
   const { loading } = usePrayerTimes();
   const prayers = useAppStore((s) => s.prayerTimes);
-  const [prayerInfo, setPrayerInfo] = useState<any>(null);
-  const timeoutRef = useRef<NodeJS.Timeout | null>(null);
   const isRamadan = useAppStore((s) => s.isRamadan);
-  console.log("Prayers from store:", prayerInfo);
-  //const prayerInfo = prayers ? getCurrentAndNextPrayer(prayers) : null;
+  
   //notification hook to schedule daily notifications based on prayer times, it will reschedule every time prayer times change (like after midnight or if user changes location/settings)
   useScheduleDailyNotifications(prayers);
-  useEffect(() => {
-    if (!prayers) return;
-
-    const schedulePrayerUpdate = () => {
-      const now = new Date();
-      const info = getCurrentAndNextPrayer(prayers);
-
-      setPrayerInfo(info);
-
-      if (timeoutRef.current) clearTimeout(timeoutRef.current);
-
-      if (!info?.nextTime) return;
-
-      const delay = info.nextTime.getTime() - now.getTime();
-
-      if (delay > 0) {
-        timeoutRef.current = setTimeout(() => {
-          schedulePrayerUpdate();
-        }, delay);
-      }
-    };
-
-    schedulePrayerUpdate();
-
-    return () => {
-      if (timeoutRef.current) clearTimeout(timeoutRef.current);
-    };
-  }, [prayers]);
+  const prayerInfo = usePrayerTracker(prayers);
+  if (!prayerInfo) return null;
 
   if (loading) {
     return (
