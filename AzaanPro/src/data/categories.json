@@ -1,0 +1,24 @@
+{
+  "en": [
+    {
+      "name": "Dhikr After Salah",
+      "slug": "dhikr-after-salah"
+    },
+    {
+      "name": "Morning Dhikr",
+      "slug": "morning-dhikr"
+    },
+    {
+      "name": "Evening Dhikr",
+      "slug": "evening-dhikr"
+    },
+    {
+      "name": "Daily Dua",
+      "slug": "daily-dua"
+    },
+    {
+      "name": "Selected Dua",
+      "slug": "selected-dua"
+    }
+  ]
+}

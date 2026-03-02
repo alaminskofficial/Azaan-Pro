@@ -1,0 +1,1 @@
+export const ASMA_UL_HUSNA_STORAGE_KEY = "asma_ul_husna_v1";
