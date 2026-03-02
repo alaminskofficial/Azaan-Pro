@@ -3,7 +3,7 @@
     "name": "Azaan Pro",
     "slug": "AzaanPro",
     "scheme": "prayer-times",
-    "version": "1.0.6",
+    "version": "1.0.7",
     "orientation": "portrait",
     "icon": "./assets/azaanpro.png",
     "userInterfaceStyle": "light",
@@ -17,7 +17,7 @@
       "supportsTablet": true
     },
     "android": {
-      "versionCode": 6,
+      "versionCode": 7,
       "adaptiveIcon": {
         "foregroundImage": "./assets/azaanpro.png",
         "backgroundColor": "#ffffff"
