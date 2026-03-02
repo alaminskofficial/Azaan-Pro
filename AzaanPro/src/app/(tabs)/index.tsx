@@ -26,12 +26,9 @@ export default function HomeScreen() {
   const { loading } = usePrayerTimes();
   const prayers = useAppStore((s) => s.prayerTimes);
   const isRamadan = useAppStore((s) => s.isRamadan);
-  
-  //notification hook to schedule daily notifications based on prayer times, it will reschedule every time prayer times change (like after midnight or if user changes location/settings)
   useScheduleDailyNotifications(prayers);
   const prayerInfo = usePrayerTracker(prayers);
-  if (!prayerInfo) return null;
-
+  
   if (loading) {
     return (
       <View style={styles.center}>
