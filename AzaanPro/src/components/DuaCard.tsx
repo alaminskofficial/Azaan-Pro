@@ -77,7 +77,7 @@ export const DuaCard = ({ dua }: Props) => {
               marginTop: 6,
             }}
           >
-            {expanded ? "Hide details" : "Show benefits"}
+            {expanded ? "Hide details" : "Show Details"}
           </Text>
         </TouchableOpacity>
       )}
