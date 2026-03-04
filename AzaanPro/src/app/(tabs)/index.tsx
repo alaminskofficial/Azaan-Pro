@@ -71,7 +71,7 @@ export default function HomeScreen() {
         {isRamadan && <RamadanBanner />}
         {isRamadan && <RamadanCard timings={prayers} />}
 
-        {/* Latest Stories */}
+        {/* Latest Stories --todo*/}
         <Text style={styles.sectionTitle}>Latest Stories</Text>
         <FlatList
           horizontal

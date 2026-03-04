@@ -135,7 +135,7 @@ export default function PrayerTimesScreen() {
 
   return (
     <View style={styles.container}>
-      {/* 80% Prayer Pages */}
+      {/* Top Section - Auto Fill */}
       <View style={styles.listContainer}>
         <FlatList
           ref={flatListRef}
@@ -151,9 +151,9 @@ export default function PrayerTimesScreen() {
             offset: width * index,
             index,
           })}
+          contentContainerStyle={{ paddingBottom: 20 }}
         />
 
-        {/* Dot Indicator */}
         <View style={styles.dotsContainer}>
           {days.map((_: any, i: any) => (
             <View
@@ -164,21 +164,30 @@ export default function PrayerTimesScreen() {
         </View>
       </View>
 
-      {/* 20% Bottom Info */}
-
+      {/* Bottom Section - Natural Height */}
       <View style={styles.bottomPanel}>
         <Text style={styles.bottomTitle}>Calculation Settings</Text>
 
         <View style={styles.bottomRow}>
-          <Text style={styles.bottomLabel}>Juristic Method (Madhab):</Text>
-          <Text style={styles.bottomValue}>
+          <Text style={styles.bottomLabel}>Juristic Method:</Text>
+          <Text
+            style={styles.bottomValue}
+            numberOfLines={1}
+            ellipsizeMode="tail"
+          >
             {madhab === "hanafi" ? "Hanafi" : "Shafi/Maliki/Hanbali"}
           </Text>
         </View>
 
         <View style={styles.bottomRow}>
-          <Text style={styles.bottomLabel}> Calculation Method:</Text>
-          <Text style={styles.bottomValue}>{getMethodName(method)}</Text>
+          <Text style={styles.bottomLabel}>Calculation Method:</Text>
+          <Text
+            style={styles.bottomValue}
+            numberOfLines={1}
+            ellipsizeMode="tail"
+          >
+            {getMethodName(method)}
+          </Text>
         </View>
       </View>
     </View>
@@ -261,21 +270,21 @@ const styles = StyleSheet.create({
   },
 
   listContainer: {
-    flex: 0.85, // 80%
+    flex: 1,
   },
 
   bottomPanel: {
-    flex: 0.15, // 20%
+    paddingVertical: 14,
+    paddingHorizontal: 18,
     backgroundColor: colors.surface,
     borderTopLeftRadius: 20,
     borderTopRightRadius: 20,
-    padding: 16,
     borderTopWidth: 1,
     borderColor: colors.border,
   },
 
   bottomTitle: {
-    fontSize: 14,
+    fontSize: 13,
     fontWeight: "600",
     color: colors.textSecondary,
     marginBottom: 10,
@@ -285,17 +294,21 @@ const styles = StyleSheet.create({
   bottomRow: {
     flexDirection: "row",
     justifyContent: "space-between",
-    marginBottom: 20,
+    alignItems: "center",
+    marginBottom: 8,
   },
 
   bottomLabel: {
     color: colors.textSecondary,
-    fontSize: 14,
+    fontSize: 13,
+    flex: 1,
   },
 
   bottomValue: {
     color: colors.textPrimary,
-    fontSize: 14,
+    fontSize: 13,
     fontWeight: "600",
+    flex: 1,
+    textAlign: "right",
   },
 });
