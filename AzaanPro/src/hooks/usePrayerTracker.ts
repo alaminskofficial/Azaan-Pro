@@ -40,8 +40,6 @@ export  function usePrayerTracker(prayers: any) {
 
   useEffect(() => {
     if (!prayers) return;
-    console.log("Scheduling prayer tracker updates...");
-
     scheduleNextUpdate();
 
     const handleAppStateChange = (nextState: AppStateStatus) => {
