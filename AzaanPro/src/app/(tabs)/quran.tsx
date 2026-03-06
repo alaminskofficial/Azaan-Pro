@@ -1,103 +1,76 @@
 import React, { useEffect, useState } from "react";
 import {
+  FlatList,
   View,
   Text,
-  FlatList,
-  TouchableOpacity,
-  StyleSheet,
   ActivityIndicator,
+  TextInput,
 } from "react-native";
-import { useRouter } from "expo-router";
 
-interface Props {
-  navigation: any;
-}
+import { getSurahList } from "@/services/quranServices";
+import SurahItem from "@/components/SurahItem";
 
-export default function QuranScreen({ navigation }: Props) {
+export default function Quran() {
   const [surahs, setSurahs] = useState<any[]>([]);
+  const [filteredSurahs, setFilteredSurahs] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
-  const router = useRouter();
+  const [search, setSearch] = useState("");
 
   useEffect(() => {
-    fetch("https://api.alquran.cloud/v1/surah")
-      .then((res) => res.json())
-      .then((data) => {
-        setSurahs(data.data);
-        setLoading(false);
-      });
+    load();
   }, []);
+
+  const load = async () => {
+    const data = await getSurahList();
+    setSurahs(data);
+    setFilteredSurahs(data);
+    setLoading(false);
+  };
+
+  const handleSearch = (text: string) => {
+    setSearch(text);
+
+    const filtered = surahs.filter((s) =>
+      s.englishName.toLowerCase().includes(text.toLowerCase()) ||
+      s.englishNameTranslation.toLowerCase().includes(text.toLowerCase()) ||
+      s.name.includes(text)
+    );
+
+    setFilteredSurahs(filtered);
+  };
 
   if (loading) {
     return (
-      <View style={styles.center}>
-        <ActivityIndicator size="large" color="#4da6ff" />
+      <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
+        <ActivityIndicator />
       </View>
     );
   }
 
   return (
-    <View style={styles.container}>
+    <View style={{ flex: 1 }}>
+      
+      {/* Search Bar */}
+      <View style={{ padding: 15 }}>
+        <TextInput
+          placeholder="Search Surah..."
+          value={search}
+          onChangeText={handleSearch}
+          style={{
+            backgroundColor: "#f1f1f1",
+            padding: 12,
+            borderRadius: 10,
+            fontSize: 16,
+          }}
+        />
+      </View>
+
+      {/* Surah List */}
       <FlatList
-        data={surahs}
-        keyExtractor={(item) => item.number.toString()}
-        renderItem={({ item }) => (
-          <TouchableOpacity
-            style={styles.surahCard}
-            onPress={() => router.push(`/surah/${item.number}`)}
-          >
-            <Text style={styles.number}>{item.number}</Text>
-
-            <View style={{ flex: 1 }}>
-              <Text style={styles.name}>{item.englishName}</Text>
-              <Text style={styles.sub}>{item.englishNameTranslation}</Text>
-            </View>
-
-            <Text style={styles.arabicName}>{item.name}</Text>
-          </TouchableOpacity>
-        )}
+        data={filteredSurahs}
+        keyExtractor={(item: any) => item.number.toString()}
+        renderItem={({ item }) => <SurahItem surah={item} />}
       />
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: "#0b1630",
-  },
-
-  center: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-  },
-
-  surahCard: {
-    flexDirection: "row",
-    alignItems: "center",
-    padding: 18,
-    borderBottomWidth: 0.5,
-    borderColor: "#1e2a4a",
-  },
-
-  number: {
-    color: "#4da6ff",
-    fontSize: 18,
-    width: 40,
-  },
-
-  name: {
-    color: "#fff",
-    fontSize: 16,
-  },
-
-  sub: {
-    color: "#aaa",
-    fontSize: 13,
-  },
-
-  arabicName: {
-    color: "#fff",
-    fontSize: 18,
-  },
-});

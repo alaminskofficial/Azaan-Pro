@@ -1,6 +1,8 @@
 import { Stack } from "expo-router";
 import { DarkTheme, ThemeProvider } from "@react-navigation/native";
 import { Audio } from "expo-av";
+import { useFonts } from "expo-font";
+
 export default function RootLayout() {
   const MyTheme = {
     ...DarkTheme,
@@ -13,6 +15,9 @@ export default function RootLayout() {
     allowsRecordingIOS: false,
     staysActiveInBackground: false,
     playsInSilentModeIOS: true,
+  });
+   const [fontLoaded] = useFonts({
+    kfgqpc: require("../../assets/fonts/kfgqpcttf.ttf"),
   });
 
   return (
